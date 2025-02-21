@@ -4,9 +4,8 @@ set debug=0
 set unique_id=poe2_test
 set build_name=InfernalistMinion
 set hostname=WIN-POE1
+set remote_ip=127.0.0.1
 
-REM if you want to use the ip, then REM the next line and -- set remote_ip=
-for /f "tokens=2 delims=[]" %%a in ('ping -n 1 %hostname% ^| findstr "["') do set remote_ip=%%a
 
 TITLE %remote_ip% %unique_id% %predefined_strategy% %build_name%
 call venv\Scripts\activate

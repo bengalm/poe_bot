@@ -409,7 +409,14 @@ class Mover:
       if mover_move_time > time_limit:
         print(f"[Mover.move] stuck cos exceed of time {time_limit} sec")
         if self.poe_bot.on_stuck_function is None:
+          self.poe_bot.helper_functions.relog()
+        else:
+          self.poe_bot.on_stuck_function()
+      if mover_move_time > time_limit * 2:
+        print(f"[Mover.move] stuck cos exceed of time {time_limit} sec")
+        if self.poe_bot.on_stuck_function is None:
           poe_bot.raiseLongSleepException("we are stuck hard, help!")
+          self.poe_bot.helper_functions.relog()
         else:
           self.poe_bot.on_stuck_function()
 
@@ -440,7 +447,14 @@ class Mover:
           if attempts_to_unstuck > 15:
             self.poe_bot.logger.writeLine("stuck in goToPoint")
             if self.poe_bot.on_stuck_function is None:
+              self.poe_bot.helper_functions.relog()
+            else:
+              self.poe_bot.on_stuck_function()
+          if attempts_to_unstuck > 30:
+            self.poe_bot.logger.writeLine("stuck in goToPoint")
+            if self.poe_bot.on_stuck_function is None:
               poe_bot.raiseLongSleepException("we are stuck hard, help!")
+              self.poe_bot.helper_functions.relog()
             else:
               self.poe_bot.on_stuck_function()
           attempts_to_unstuck += 1

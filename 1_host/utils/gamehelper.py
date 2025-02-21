@@ -937,6 +937,8 @@ class Entities:
           self.broken_entities.append(entity)
           continue
         else:
+          if entity.render_name=='Bogfelled Commoner':#burial bog map
+            continue
           self.attackable_entities.append(entity)
           if entity.rarity == "Rare":
             if entity.essence_monster is True:
