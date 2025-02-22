@@ -44,7 +44,7 @@ class CombatModule:
         mover = poe_bot.mover
         build = self.build
         print(f"#killUsualEntity {entity}")
-        first_attack_time = None
+        first_attack_time = 0
         # if "/LeagueBestiary/" in entity['Path']:
         #   print(f'/LeagueBestiary/ in entity path, forcing min_hp = 1')
         #   min_hp = 1
@@ -72,7 +72,7 @@ class CombatModule:
             if len(entity_to_kill) != 0:
                 entity_to_kill = entity_to_kill[0]
                 print(f"check first_attack_time {first_attack_time}")
-                if first_attack_time is not None:
+                if first_attack_time is not 0:
                     print(
                         f"first_attack_time + max_kill_time_sec < _t {first_attack_time} + {max_kill_time_sec} < {_t}")
                     if first_attack_time + max_kill_time_sec < _t:
@@ -2970,7 +2970,7 @@ class InfernalistMinion(Build):
                 self.minion_sniper_gas_arrow = SkillWithDelay(
                     poe_bot=poe_bot,
                     skill_index=skill_index,
-                    min_delay=random.uniform(2.5, 3.0),
+                    min_delay=random.uniform(4, 6),
                     display_name="minion_sniper_gas_arrow",
                     can_use_earlier=False,
                 )
@@ -3006,7 +3006,7 @@ class InfernalistMinion(Build):
                 can_use_earlier=False,
             )
 
-        offering_internal_name = "pain_offering"
+        offering_internal_name = "bone_offering"
         offerening_index = offering_internal_name in self.poe_bot.game_data.skills.internal_names and self.poe_bot.game_data.skills.internal_names.index(
             offering_internal_name
         )
@@ -3021,19 +3021,35 @@ class InfernalistMinion(Build):
                 can_use_earlier=False,
             )
 
-        flammability_internal_name = "fire_weakness"
-        flammability_index = (
-                flammability_internal_name in self.poe_bot.game_data.skills.internal_names
-                and self.poe_bot.game_data.skills.internal_names.index(flammability_internal_name)
+        # flammability_internal_name = "fire_weakness"
+        # flammability_index = (
+        #         flammability_internal_name in self.poe_bot.game_data.skills.internal_names
+        #         and self.poe_bot.game_data.skills.internal_names.index(flammability_internal_name)
+        # )
+        # print(f"flammability_index {flammability_index}")
+        # self.flammability = None
+        # if flammability_index is not False:
+        #     self.flammability = SkillWithDelay(
+        #         poe_bot=poe_bot,
+        #         skill_index=flammability_index,
+        #         min_delay=random.uniform(2.0, 3.0),
+        #         display_name="flammability",
+        #         can_use_earlier=False,
+        #     )
+        #
+        vulnerability_internal_name = "vulnerability"
+        vulnerability_index = (
+                vulnerability_internal_name in self.poe_bot.game_data.skills.internal_names
+                and self.poe_bot.game_data.skills.internal_names.index(vulnerability_internal_name)
         )
-        print(f"flammability_index {flammability_index}")
-        self.flammability = None
-        if flammability_index is not False:
-            self.flammability = SkillWithDelay(
+        print(f"vulnerability_index {vulnerability_index}")
+        self.vulnerability = None
+        if vulnerability_index is not False:
+            self.vulnerability = SkillWithDelay(
                 poe_bot=poe_bot,
-                skill_index=flammability_index,
-                min_delay=random.uniform(2.0, 3.0),
-                display_name="flammability",
+                skill_index=vulnerability_index,
+                min_delay=random.uniform(4.0, 5.0),
+                display_name="vulnerability",
                 can_use_earlier=False,
             )
 
@@ -3048,7 +3064,7 @@ class InfernalistMinion(Build):
             self.flame_wall = SkillWithDelay(
                 poe_bot=poe_bot,
                 skill_index=flame_wall_index,
-                min_delay=random.uniform(0.5, 1),
+                min_delay=random.uniform(3, 4),
                 display_name="flame_wall",
                 can_use_earlier=False,
             )
@@ -3160,8 +3176,10 @@ class InfernalistMinion(Build):
                     if len(alive_srs_nearby) < self.max_srs_count:
                         self.flame_wall.use(updated_entity=enemy_to_attack, wait_for_execution=False)
 
-                if self.flammability and self.flammability.canUse() and self.flammability.last_use_time + attacking_skill_delay < time.time():
-                    self.flammability.use(updated_entity=enemy_to_attack, wait_for_execution=False)
+                # if self.flammability and self.flammability.canUse() and self.flammability.last_use_time + attacking_skill_delay < time.time():
+                #     self.flammability.use(updated_entity=enemy_to_attack, wait_for_execution=False)
+                if self.vulnerability and self.vulnerability.canUse() and self.vulnerability.last_use_time + attacking_skill_delay < time.time():
+                    self.vulnerability.use(updated_entity=enemy_to_attack, wait_for_execution=False)
 
                 if (
                         self.minion_sniper_gas_arrow
@@ -3256,7 +3274,7 @@ class InfernalistMinion(Build):
         self.useFlasks()
 
         min_distance = 35  # distance which is ok to start attacking
-        keep_distance = 55  # if our distance is smth like this, kite
+        keep_distance = 25  # if our distance is smth like this, kite
         critical_distance = 15
         distance_range = 5
 
@@ -3345,8 +3363,11 @@ class InfernalistMinion(Build):
                     if self.offering.use(updated_entity=minions_around[0], wait_for_execution=False) is True:
                         skill_used = True
 
-            if skill_used is False and self.flammability and self.flammability.canUse():
-                if self.flammability.use(updated_entity=entity_to_kill, wait_for_execution=False) is True:
+            # if skill_used is False and self.flammability and self.flammability.canUse():
+            #     if self.flammability.use(updated_entity=entity_to_kill, wait_for_execution=False) is True:
+            #         skill_used = True
+            if skill_used is False and self.vulnerability and self.vulnerability.canUse():
+                if self.vulnerability.use(updated_entity=entity_to_kill, wait_for_execution=False) is True:
                     skill_used = True
 
             if skill_used is False and self.minion_reaver_enrage and self.minion_reaver_enrage.canUse():

@@ -7,7 +7,7 @@ if typing.TYPE_CHECKING:
 
 import random
 import time
-from math import dist
+from math import dist, trunc
 
 from .constants import DOOR_KEYWORDS
 from .utils import alwaysFalseFunction, angleOfLine, createLineIteratorWithValues, pointOnCircleByAngleAndLength
@@ -183,7 +183,7 @@ class Mover:
     poe_bot.bot_controls.mouse.setPosSmooth(pos_x, pos_y)
     return True
 
-  def openNearestDoor(self, distance_to_door=15):
+  def openNearestDoor(self, distance_to_door=25):
     door_type = 0
     poe_bot = self.poe_bot
     opened_doors = self.opened_doors
@@ -333,7 +333,15 @@ class Mover:
     print(f"[Mover.goToPoint] len(path): {len(path)}")
     # reset timer
     poe_bot.last_action_time = 0  # reset action delay
+
+    counttt= 0
     while arrived is False:
+      counttt+=1
+      if counttt >= 30:
+        arrived=True
+        print(f'ccccccc=---------30')
+        break
+
       poe_bot.refreshInstanceData()
       # check if arrived
       distance_to_target = dist((grid_pos_to_go_y, grid_pos_to_go_x), [poe_bot.game_data.player.grid_pos.y, poe_bot.game_data.player.grid_pos.x])
@@ -731,7 +739,7 @@ class Mover:
 
     for action in queue:
       action()
-    
+
     nearest_angle_screen = nearest_angle - 45
     if nearest_angle_screen < 0:
       nearest_angle_screen += 360

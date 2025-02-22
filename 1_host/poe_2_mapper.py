@@ -51,13 +51,16 @@ MAPS_TO_IGNORE = [
     "MapAugury",  # activators
     "MapFortress",  # TODO class MapForptress boss activators
     "MapLostTowers",  # class MapLostTowers multi layerd location
-    "MapBluff",  # tower
+    # "MapBluff",  # tower
     "MapMesa",  # tower
     "MapSwampTower",  # multi layerd
     "MapSwampTower_NoBoss",  # multi layerd
     "MapSeepage",  # multi layerd
     "MapUberBoss_IronCitadel",  # 'MapUberBoss_IronCitadel'
+    "MapSunTemple_NoBoss",  # 'MapSunTemple'
     "MapSunTemple",  # 'MapSunTemple'
+    "MapUniqueVault",  # 'MapUniqueVault'
+    "MapUberBoss_StoneCitadel",  # 'MapUberBoss_StoneCitadel'
 
 ]
 
@@ -88,6 +91,7 @@ class MapperSettings:
 
     low_priority_maps = []
     high_priority_maps = []
+    # high_priority_maps = ["MapBluff"]
 
     waystone_upgrade_to_rare = True
     waystone_upgrade_to_rare_force = True  # TODO identify + alch|| identify + aug + regal
@@ -104,7 +108,7 @@ class MapperSettings:
     force_kill_blue = True
     force_kill_rares = True
 
-    force_deli = False
+    force_deli = True
     force_breaches = True
 
     do_essences = True
@@ -775,7 +779,16 @@ class Mapper2(PoeBotComponent):
             if len(poe_bot.game_data.entities.essence_monsters) != 0:
                 print("got essenced mobs, killing them")
                 for entity in poe_bot.game_data.entities.essence_monsters:
-                    poe_bot.combat_module.killUsualEntity(entity=entity)
+                    kill_done = poe_bot.combat_module.killUsualEntity(entity=entity)
+                    if kill_done:
+                        # 捡
+                        print(f'no monster gonna to collectLoot --------->')
+                        while True:
+                            poe_bot.refreshInstanceData()
+                            resk = poe_bot.loot_picker.collectLoot()
+                            if resk is False:
+                                break
+
                 return True
             essence = next(
                 (e for e in poe_bot.game_data.entities.all_entities if
@@ -1407,7 +1420,7 @@ mapper_settings = MapperSettings({})
 # adjust mapper settings below
 mapper_settings.do_rituals = False
 # mapper_settings.do_rituals_buyout_function =
-# mapper_settings.high_priority_maps = ["Bluff"]
+mapper_settings.high_priority_maps = ["MapBluff"]
 mapper_settings.complete_tower_maps = False
 mapper_settings.min_map_tier = 13
 mapper_settings.anoint_maps = False
@@ -1466,7 +1479,8 @@ def isItemHasPickableKey(item_label: PickableItemLabel):
     if item_label.icon_render in ARTS_TO_PICK:
         return True
     elif item_label.icon_render.startswith(
-            "Art/2DItems/Currency/") and "/Ruthless/" not in item_label.icon_render:  # All currency
+            "Art/2DItems/Currency/") and not item_label.icon_render.startswith(
+        "Art/2DItems/Currency/Runes/") and "/Ruthless/" not in item_label.icon_render:  # All currency
         return True
     # elif item_label.icon_render.startswith("Art/2DItems/Maps/EndgameMaps/"):  # All maps
     #     return True
