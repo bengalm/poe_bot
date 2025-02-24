@@ -165,6 +165,7 @@ class PoeBot:
       if refreshed_data[is_loading_key] is False:
         break
       else:
+        break
         if request_type == "partial":
           self.bot_controls.releaseAll()
           raise Exception("area is loading on partial request")

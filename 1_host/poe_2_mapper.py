@@ -105,7 +105,7 @@ class MapperSettings:
 
     complete_tower_maps = True
 
-    force_kill_blue = True
+    force_kill_blue = False
     force_kill_rares = True
 
     force_deli = True
@@ -754,7 +754,8 @@ class Mapper2(PoeBotComponent):
                 return True
         if settings.force_kill_rares is not False:
             mob_to_kill = next(
-                (e for e in poe_bot.game_data.entities.attackable_entities_rares if e.isOnPassableZone()), None)
+                (e for e in poe_bot.game_data.entities.attackable_entities_rares if True), None)
+                # (e for e in poe_bot.game_data.entities.attackable_entities_rares if e.isOnPassableZone()), None)
             if mob_to_kill:
                 res = True
                 while res is not None:
@@ -1420,7 +1421,7 @@ mapper_settings = MapperSettings({})
 # adjust mapper settings below
 mapper_settings.do_rituals = False
 # mapper_settings.do_rituals_buyout_function =
-mapper_settings.high_priority_maps = ["MapBluff"]
+# mapper_settings.high_priority_maps = ["MapBluff"]
 mapper_settings.complete_tower_maps = False
 mapper_settings.min_map_tier = 13
 mapper_settings.anoint_maps = False
@@ -1457,6 +1458,8 @@ ARTS_TO_PICK = ["Art/2DItems/Maps/DeliriumSplinter.dds",
                 "Art/2DItems/Amulets/Basetypes/StellarAmulet.dds",  # Stellar Amulet
                 "Art/2DItems/Rings/Basetypes/SapphireRing.dds",  # Sapphire Ring
                 "Art/2DItems/Rings/Basetypes/GoldRing.dds",  # Gold Ring
+                
+                "Art/2DItems/Maps/UltimatumTrialItem.dds",
                 "Art/2DItems/Maps/EndgameMaps/EndgameMap13.dds",  # 13 Waystone (Tier 13)
                 "Art/2DItems/Maps/EndgameMaps/EndgameMap14.dds",  # 14 Waystone (Tier 14)
                 "Art/2DItems/Maps/EndgameMaps/EndgameMap15.dds",  # 15 Waystone (Tier 15)
@@ -1483,6 +1486,10 @@ def isItemHasPickableKey(item_label: PickableItemLabel):
     # elif item_label.icon_render.startswith("Art/2DItems/Maps/EndgameMaps/"):  # All maps
     #     return True
     elif item_label.icon_render.startswith("Art/2DItems/Jewels/"):  # Jewels
+        return True
+    elif "Amulets" in item_label.icon_render:
+        return True
+    elif "Rings" in item_label.icon_render:
         return True
     return False
 

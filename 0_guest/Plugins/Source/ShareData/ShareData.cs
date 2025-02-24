@@ -1716,15 +1716,55 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
 //        });
 //        DebugWindow.LogMsg($"checking full {j}");
 //        DebugWindow.LogMsg("checking full "+j);
-        DebugWindow.LogMsg($"checking full {choices_panel_object}");
+        DebugWindow.LogMsg($"chaosPanel full {choices_panel_object}");
 
         List<UltimatumPanelChoicesObj> panel_choices  = new List<UltimatumPanelChoicesObj>();
 
         chaos_panel.choices=panel_choices;
-//        var cs = choices_panel_object.ChoicesElements;
-//        foreach (var tile in cs){
-//           DebugWindow.LogMsg($"checking cs {tile.txt}");
-//        }
+        var cs = choices_panel_object.ChoiceElements;
+        foreach (var e in cs){
+           DebugWindow.LogMsg($"chaosPanel cs {e.txt}");
+           UltimatumPanelChoicesObj n=new UltimatumPanelChoicesObj();
+           n.name=e.Text
+           try{
+                if (e.Center!=null)
+                {
+                    if (e.Center.X<0||e.Center.X>5000||e.Center.Y<0||e.Center.Y>5000)
+                    {
+                         DebugWindow.LogMsg("chaosPanel foreach center err");
+                    }else{
+                     DebugWindow.LogMsg($"chaosPanel foreach centerX={e.Center.X} centerY={e.Center.Y} {e.Center.GetType()}---------");
+                    int f_x=(int)e.Center.X;
+                    int f_y=(int)e.Center.Y;
+                    n.grid_position =  [f_x , f_y];
+                     n.visible_button_screen_zone = new List<int> {
+                        f_x,
+                        (int)(f_x+ e.Width),
+                       f_y,
+                        (int)(f_y + e.Height),
+                       };
+                    }
+                }
+                }catch(Exception ex){
+                    DebugWindow.LogError($"Traverse error: {ex}");
+                }
+               chaos_panel.
+        }
+
+        var csBtn =choices_panel_object.ConfirmButton;
+        if (csBtn!=null)
+        {
+                    int f_x=(int)e.Center.X;
+                    int f_y=(int)e.Center.Y;
+                    n.grid_position =  [f_x , f_y];
+                     n.visible_button_screen_zone = new List<int> {
+                        f_x,
+                        (int)(f_x+ e.Width),
+                       f_y,
+                        (int)(f_y + e.Height),
+                       };
+                    }
+        }
 
         return chaos_panel;
     }
@@ -1778,16 +1818,37 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
             bool isVisible = false;
 
 
-            DebugWindow.LogMsg($"Traverse foreach obj={e}---------");
+//            DebugWindow.LogMsg($"Traverse foreach obj={e}---------");
             isVisible=e.IsVisible;
             if (isVisible)
             {
                 VisibleUi n=new VisibleUi();
                 n.is_visible=isVisible;
                 n.text=e.Text ;
-                int f_x=(int)e.X;
-                int f_y=(int)e.Y;
-                n.grid_position =  [f_x , f_y];
+
+                try{
+                if (e.Center!=null)
+                {
+                    if (e.Center.X<0||e.Center.X>5000||e.Center.Y<0||e.Center.Y>5000)
+                    {
+                         DebugWindow.LogMsg("Traverse foreach center err");
+                    }else{
+                     DebugWindow.LogMsg($"Traverse foreach centerX={e.Center.X} centerY={e.Center.Y} {e.Center.GetType()}---------");
+                    int f_x=(int)e.Center.X;
+                    int f_y=(int)e.Center.Y;
+                    n.grid_position =  [f_x , f_y];
+                     n.visible_button_screen_zone = new List<int> {
+                        f_x,
+                        (int)(f_x+ e.Width),
+                       f_y,
+                        (int)(f_y + e.Height),
+                       };
+                    }
+
+                }
+                }catch(Exception ex){
+                    DebugWindow.LogError($"Traverse error: {ex}");
+                }
                 n.is_active=e.IsActive;
                List<Element> list_children =e.Children.ToList();
                 if (list_children.Count > 1)

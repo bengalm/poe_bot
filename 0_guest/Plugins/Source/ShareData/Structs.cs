@@ -520,20 +520,26 @@ public class GridPosition_generated
 
 public class UltimatumPanelChoicesObj
 {
+    [JsonProperty("v_b_sz")]
+    public List<int> visible_button_screen_zone { get; set; }
+    [JsonProperty("gp")]
+    public int[] grid_position { get; set; }
     [JsonProperty("sz")]
     public List<int> screen_zone { get; set; } // label screen zone x1 x2 y1 y2
-    // [JsonProperty("id")]
     public int id { get; set; }
-    // [JsonProperty("tt")]
     public string name { get; set; }
     public string name_raw { get; set; }
-//    public List<string> icons { get; set; }
+
 }
 
 public class GetUltimatumPanelInfoObject
 {
     [JsonProperty("cs")]
     public List<UltimatumPanelChoicesObj> choices { get; set; } // avaliable_maps
+    [JsonProperty("bt_b_sz")]
+    public List<int> button_screen_zone { get; set; }
+    [JsonProperty("gp")]
+    public int[] grid_position { get; set; }
 }
 
 
@@ -545,6 +551,8 @@ public class VisibleUi
   public bool is_active { get; set; }
   [JsonProperty("childCount")]
   public int child_count { get; set; }
+  [JsonProperty("v_b_sz")]
+  public List<int> visible_button_screen_zone { get; set; }
  [JsonProperty("children")]
  public List<VisibleUi> children { get; set; }  = new List<VisibleUi>();//Children
  [JsonProperty("gp")]

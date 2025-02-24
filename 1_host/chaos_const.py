@@ -18,8 +18,11 @@ LiftMovementController_UpDisabledUntilComplete='Metadata/Terrain/Gallows/Act3/3_
 # npc
 UltimatumNPC="Metadata/NPC/League/Ultimatum/UltimatumNPC"
 
+# 选择
+UltimatumSelector="Metadata/Terrain/Gallows/Act3/3_10/Objects/UltimatumSelector"
 # 起来的平台
-# 'Metadata/Terrain/Gallows/Act3/3_10/Objects/LiftPlatform'
+LiftPlatform='Metadata/Terrain/Gallows/Act3/3_10/Objects/LiftPlatform'
+LiftButton_Platform='Metadata/Terrain/Gallows/Act3/3_10/Objects/LiftButton_Platform'
 
 #
 #'Metadata/Terrain/Gallows/Act3/3_10/Objects/UltimatumSelector'
