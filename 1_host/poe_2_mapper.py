@@ -1457,11 +1457,9 @@ ARTS_TO_PICK = ["Art/2DItems/Maps/DeliriumSplinter.dds",
                 "Art/2DItems/Amulets/Basetypes/StellarAmulet.dds",  # Stellar Amulet
                 "Art/2DItems/Rings/Basetypes/SapphireRing.dds",  # Sapphire Ring
                 "Art/2DItems/Rings/Basetypes/GoldRing.dds",  # Gold Ring
-
                 "Art/2DItems/Maps/EndgameMaps/EndgameMap13.dds",  # 13 Waystone (Tier 13)
                 "Art/2DItems/Maps/EndgameMaps/EndgameMap14.dds",  # 14 Waystone (Tier 14)
                 "Art/2DItems/Maps/EndgameMaps/EndgameMap15.dds",  # 15 Waystone (Tier 15)
-
                 ]
 
 # big piles of gold

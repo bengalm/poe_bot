@@ -29,8 +29,8 @@ notebook_dev = False
 
 
 default_config = {
-  "REMOTE_IP": "172.17.91.193",  # z2
-  "unique_id": "poe_2_test",
+  "REMOTE_IP": "127.0.0.1",  # z2
+  "unique_id": "poe_2_test_simulacrum",
   "force_reset_temp": False,
 }
 
@@ -77,16 +77,20 @@ from utils.utils import createLineIteratorWithValues
 
 # In[ ]:
 
-
+#
 from utils.combat import BarrierInvocationInfernalist, InfernalistZoomancer
+#
+# if "demon_transformation" in poe_bot.game_data.skills.internal_names:
+#   print("barrier build")
+#   poe_bot.combat_module.build = BarrierInvocationInfernalist(poe_bot)
+#
+# else:
+#   print("minions build")
+#   poe_bot.combat_module.build = InfernalistZoomancer(poe_bot, can_kite=False)
 
-if "demon_transformation" in poe_bot.game_data.skills.internal_names:
-  print("barrier build")
-  poe_bot.combat_module.build = BarrierInvocationInfernalist(poe_bot)
+from utils.combat import InfernalistMinion
 
-else:
-  print("minions build")
-  poe_bot.combat_module.build = InfernalistZoomancer(poe_bot, can_kite=False)
+poe_bot.combat_module.build = InfernalistMinion(poe_bot)
 
 min_stacks_for_wave_11_plus = 60
 reset_form_before_waves = [9]
@@ -107,11 +111,31 @@ poe_bot.mover.default_continue_function = poe_bot.combat_module.build.usualRouti
 from utils.loot_filter import PickableItemLabel
 
 ARTS_TO_PICK = [
-  "Art/2DItems/Currency/CurrencyModValues.dds",  # divine https://poe2db.tw/us/Divine_Orb - icon
+  "Art/2DItems/Maps/DeliriumSplinter.dds",
+  "Art/2DItems/Maps/",
+  "Art/2DItems/Currency/CurrencyModValues.dds",  # divine https://poe2db.tw/us/Divine_Orb
   "Art/2DItems/Currency/CurrencyGemQuality.dds",  # gemcutter
   "Art/2DItems/Currency/CurrencyRerollRare.dds",  # chaos
   "Art/2DItems/Currency/CurrencyAddModToRare.dds",  # exalt
   "Art/2DItems/Currency/CurrencyUpgradeToUnique.dds",  # chance
+  "Art/2DItems/Currency/CurrencyRerollSocketNumbers03.dds",
+  "Art/2DItems/Currency/CurrencyRerollSocketNumbers02.dds",
+  "Art/2DItems/Currency/CurrencyDuplicate.dds",
+  "Art/2DItems/Maps/DeliriumSplinter.dds",
+  "Art/2DItems/Currency/CurrencyAddEquipmentSocket.dds",  # 防具打动
+  "Art/2DItems/Currency/CurrencyVaal.dds",  # 瓦尔宝珠
+  "Art/2DItems/Currency/CurrencyUpgradeMagicToRare.dds",  # 富豪 Regal Orb
+  "Art/2DItems/Currency/CurrencyWeaponMagicQuality.dds",  # 打动 Arcanist's Etcher
+  "Art/2DItems/Currency/CurrencyUpgradeToUniqueShard.dds",  # Chance Shard 机会石碎片
+  "Art/2DItems/Currency/CurrencyRerollSocketNumbers01.dds",  # "Lesser Jeweller's Orb" 机会石碎片
+  "Art/2DItems/Belts/Basetypes/Belt09.dds",  # Heavy Belt
+  "Art/2DItems/Amulets/Basetypes/StellarAmulet.dds",  # Stellar Amulet
+  "Art/2DItems/Rings/Basetypes/SapphireRing.dds",  # Sapphire Ring
+  "Art/2DItems/Rings/Basetypes/GoldRing.dds",  # Gold Ring
+  "Art/2DItems/Maps/EndgameMaps/EndgameMap13.dds",  # 13 Waystone (Tier 13)
+  "Art/2DItems/Maps/EndgameMaps/EndgameMap14.dds",  # 14 Waystone (Tier 14)
+  "Art/2DItems/Maps/EndgameMaps/EndgameMap15.dds",  # 15 Waystone (Tier 15)
+
 ]
 
 # # big piles of gold
@@ -129,12 +153,18 @@ WHITE_BASES_TO_PICK = ["Art/2DItems/Amulets/Basetypes/StellarAmulet.dds", "Art/2
 def isItemHasPickableKey(item_label: PickableItemLabel):
   if item_label.icon_render in ARTS_TO_PICK:
     return True
+  elif item_label.icon_render.startswith(
+          "Art/2DItems/Currency/") and not item_label.icon_render.startswith(
+    "Art/2DItems/Currency/Runes/"):  # All currency
+    return True
+  elif item_label.icon_render.startswith("Art/2DItems/Jewels/"):  # Jewels
+    return True
   elif "Art/2DItems/Currency/Essence/" in item_label.icon_render:
     return True
   elif "Art/2DItems/Currency/DistilledEmotions" in item_label.icon_render:
     return True
   elif "Art/2DItems/Flasks/Uniques/MeltingMaelstrom" in item_label.icon_render:
-    print("flaaaaaaaaask")
+    print("flaaaaaaaaask--------------------------------------------------")
     return True
   elif item_label.rarity == "Normal" and item_label.icon_render in WHITE_BASES_TO_PICK:
     return True
@@ -279,12 +309,12 @@ class Simulacrum2:
         poe_bot.refreshInstanceData()
         poe_bot.mover.goToEntitysPoint(afflictionator_entity, release_mouse_on_end=True, custom_break_function=self.scanForInterestingEntities)
 
-      if isinstance(poe_bot.combat_module.build) == BarrierInvocationInfernalist and reset_form_before_waves != [] and self.cache.wave > 1:
-        demon_stacks = poe_bot.combat_module.build.getDemonFormStacks()
-        print(f"going to generate {min_stacks_for_wave_11_plus} stacks")
-        if demon_stacks < min_stacks_for_wave_11_plus:
-          self.stashItemsIfFull(0)
-          poe_bot.combat_module.build.generateStacks(min_stacks_for_wave_11_plus)
+      # if isinstance(poe_bot.combat_module.build) == BarrierInvocationInfernalist and reset_form_before_waves != [] and self.cache.wave > 1:
+      #   demon_stacks = poe_bot.combat_module.build.getDemonFormStacks()
+      #   print(f"going to generate {min_stacks_for_wave_11_plus} stacks")
+      #   if demon_stacks < min_stacks_for_wave_11_plus:
+      #     self.stashItemsIfFull(0)
+      #     poe_bot.combat_module.build.generateStacks(min_stacks_for_wave_11_plus)
 
       def getNextWaveFromAfflictionatorLabel():
         visible_labels_raw = poe_bot.backend.getVisibleLabels()
@@ -369,9 +399,12 @@ class Simulacrum2:
     self.cache.save()
 
   def activateMap(self):
+    poe_bot: Poe2Bot = self.poe_bot
+    poe_bot.ui.inventory.update()
+
     poe_bot.ui.map_device.open()
-    time.sleep(1)
-    poe_bot.ui.map_device.open()
+    time.sleep(4)
+    poe_bot.ui.map_device.update()
 
     ziggurat_map = next((m for m in poe_bot.ui.map_device.all_maps if m.name == "The Ziggurat Refuge"), None)
     while ziggurat_map is None:

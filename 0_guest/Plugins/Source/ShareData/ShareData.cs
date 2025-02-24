@@ -16,6 +16,9 @@ using ExileCore2.PoEMemory.MemoryObjects;
 using ExileCore2.Shared.Enums;
 using GameOffsets2.Native;
 using Stack = ExileCore2.PoEMemory.Components.Stack;
+
+using System.Reflection;
+using Newtonsoft.Json;
 // 111 9 11 0 deli activator thing
 
 namespace ShareData;
@@ -1684,6 +1687,161 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
         return response;
 
     }
+
+    public GetUltimatumPanelInfoObject chaosPanel(){
+        GetUltimatumPanelInfoObject chaos_panel = new GetUltimatumPanelInfoObject();
+//        var choices_panel_object = PoEMemory.Elements.UltimatumPanel.ChoicesPanel;
+        var choices_panel_object = GameController.IngameState.IngameUi.UltimatumPanel.ChoicesPanel;
+        DebugWindow.LogMsg("chaosPanel-----");
+
+        Type type = choices_panel_object.GetType(); // 获取对象的类型
+
+       DebugWindow.LogMsg("=== ppp ===");
+        foreach (PropertyInfo property in type.GetProperties())
+        {
+            DebugWindow.LogMsg($"{property.Name} ===({property.PropertyType.Name})");
+        }
+
+       DebugWindow.LogMsg("\n=== mmm ===");
+        foreach (MethodInfo method in type.GetMethods())
+        {
+            DebugWindow.LogMsg($"{method.Name}=== (return: {method.ReturnType.Name})");
+        }
+         if (choices_panel_object.IsVisible == false){
+            return chaos_panel;
+        }
+
+//        var j=JsonConvert.SerializeObject(choices_panel_object, new JsonSerializerSettings{
+//            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+//        });
+//        DebugWindow.LogMsg($"checking full {j}");
+//        DebugWindow.LogMsg("checking full "+j);
+        DebugWindow.LogMsg($"checking full {choices_panel_object}");
+
+        List<UltimatumPanelChoicesObj> panel_choices  = new List<UltimatumPanelChoicesObj>();
+
+        chaos_panel.choices=panel_choices;
+//        var cs = choices_panel_object.ChoicesElements;
+//        foreach (var tile in cs){
+//           DebugWindow.LogMsg($"checking cs {tile.txt}");
+//        }
+
+        return chaos_panel;
+    }
+
+    static VisibleUi ExtractVisibleUiObjects(Element obj)
+    {
+        VisibleUi result = new VisibleUi();
+        Traverse(obj, result);
+        return result;
+    }
+    static void Traverse(Element obj, VisibleUi result)
+    {
+        if (obj == null)
+        {
+          DebugWindow.LogMsg("Traverse obj null ---------");
+            return;
+        }
+        if (obj.Children==null||obj.Children.Count<1){
+           DebugWindow.LogMsg("Traverse Children null new ---------");
+            return;
+        }
+//        Type ot=obj.GetType();
+//       FieldInfo ot_c= ot.GetField("Children");
+//       if (ot_c == null)
+//       {
+//            DebugWindow.LogMsg("Traverse Children null ---------");
+//            return;
+//       }
+//       List<object> objList=ot_c.GetValue(obj) as List<object>;
+//        if (objList!=null||objList.Count<1)
+//        {
+//          DebugWindow.LogMsg("Traverse objList.Count<1 ---------");
+//            return;
+//        }
+
+     foreach (var e in obj.Children)
+     {
+//            Type type = e.GetType();
+//            bool isVisible = false;
+//
+//            FieldInfo field_text = type.GetField("Text");
+//            FieldInfo field_isVisible = type.GetField("IsVisible");
+//            FieldInfo field_isActive = type.GetField("IsActive");
+//            FieldInfo field_X = type.GetField("X");
+//            FieldInfo field_Y = type.GetField("Y");
+//            FieldInfo field_Children = type.GetField("Children");
+//
+//            isVisible= (bool)field_isVisible.GetValue(e);
+//
+//            DebugWindow.LogMsg($"Traverse foreach obj={e}---------");
+            bool isVisible = false;
+
+
+            DebugWindow.LogMsg($"Traverse foreach obj={e}---------");
+            isVisible=e.IsVisible;
+            if (isVisible)
+            {
+                VisibleUi n=new VisibleUi();
+                n.is_visible=isVisible;
+                n.text=e.Text ;
+                int f_x=(int)e.X;
+                int f_y=(int)e.Y;
+                n.grid_position =  [f_x , f_y];
+                n.is_active=e.IsActive;
+               List<Element> list_children =e.Children.ToList();
+                if (list_children.Count > 1)
+                {
+                    foreach (var child in list_children)
+                    {
+                        Traverse(child, n);
+                    }
+                }
+                result.children.Add(n);
+            }
+     }
+    }
+    public VisibleUi VisibleUi(){
+        VisibleUi visible_ui = new VisibleUi();
+        var visible_ui_object = GameController.IngameState.IngameUi;
+        DebugWindow.LogMsg("GetVisibleUiObject-----");
+        DebugWindow.LogMsg($"GetVisibleUiObject----- Children Count={visible_ui_object.Children.Count}----");
+//        Type type = visible_ui_object.GetType(); // 获取对象的类型
+//        DebugWindow.LogMsg("=== ppp ===");
+//        foreach (PropertyInfo property in type.GetProperties())
+//        {
+//            DebugWindow.LogMsg($"{property.Name} ===({property.PropertyType.Name})");
+//        }
+//
+//       DebugWindow.LogMsg("\n=== mmm ===");
+//        foreach (MethodInfo method in type.GetMethods())
+//        {
+//            DebugWindow.LogMsg($"{method.Name}=== (return: {method.ReturnType.Name})");
+//        }
+//         if (visible_ui_object.IsVisible == false){
+//            return visible_ui;
+//        }
+
+        // 执行转换
+        VisibleUi result = ExtractVisibleUiObjects(visible_ui_object);
+
+     var j=JsonConvert.SerializeObject(result, new JsonSerializerSettings{
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+          });
+          DebugWindow.LogMsg($"checking full {j}");
+          DebugWindow.LogMsg("checking full "+j);
+//        DebugWindow.LogMsg($"checking full {visible_ui_object}");
+//        List<VisibleUi> children  = new List<VisibleUi>();
+//        visible_ui.datas=children;
+//        var cs = visible_ui_object.Children;
+//        foreach (var tile in cs){
+//
+//           DebugWindow.LogMsg($"checking cs {tile.txt}");
+//        }
+
+        return result;
+    }
+
     private string ProcessRequest(string rawRequest)
     {
         DebugWindow.LogMsg($"Received request: {rawRequest}");
@@ -1812,6 +1970,11 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
 
                 case "/getNpcRewardUi":
                     return SerializeData(getNpcRewardUi());
+
+                case "/getChaosPanel":
+                    return SerializeData(chaosPanel());
+                case "/getVisibleUi":
+                    return SerializeData(VisibleUi());
 
                 default:
                     return "Unknown request";

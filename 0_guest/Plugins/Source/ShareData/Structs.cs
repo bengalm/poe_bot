@@ -518,3 +518,40 @@ public class GridPosition_generated
     public int Y { get; set; }
 }
 
+public class UltimatumPanelChoicesObj
+{
+    [JsonProperty("sz")]
+    public List<int> screen_zone { get; set; } // label screen zone x1 x2 y1 y2
+    // [JsonProperty("id")]
+    public int id { get; set; }
+    // [JsonProperty("tt")]
+    public string name { get; set; }
+    public string name_raw { get; set; }
+//    public List<string> icons { get; set; }
+}
+
+public class GetUltimatumPanelInfoObject
+{
+    [JsonProperty("cs")]
+    public List<UltimatumPanelChoicesObj> choices { get; set; } // avaliable_maps
+}
+
+
+public class VisibleUi
+{
+  [JsonProperty("isVisible")]
+  public bool is_visible { get; set; }
+  [JsonProperty("isActive")]
+  public bool is_active { get; set; }
+  [JsonProperty("childCount")]
+  public int child_count { get; set; }
+ [JsonProperty("children")]
+ public List<VisibleUi> children { get; set; }  = new List<VisibleUi>();//Children
+ [JsonProperty("gp")]
+    public int[] grid_position { get; set; }
+    [JsonProperty("wp")]
+    public int[] world_position { get; set; }
+[JsonProperty("text")]
+    public string text { get; set; }
+
+}

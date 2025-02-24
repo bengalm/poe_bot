@@ -337,9 +337,9 @@ class Mover:
     counttt= 0
     while arrived is False:
       counttt+=1
-      if counttt >= 30:
+      if counttt >= 100:
         arrived=True
-        print(f'ccccccc=---------30')
+        print(f'ccccccc=---------100')
         break
 
       poe_bot.refreshInstanceData()

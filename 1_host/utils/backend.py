@@ -228,6 +228,10 @@ class Backend:
 
   def getPartyInfo(self):
     return self._endpoint_request("getPartyInfo")
+  def getChaosPanel(self):
+      return self._endpoint_request("getChaosPanel")
+  def getVisibleUi(self):
+        return self._endpoint_request("getVisibleUi")
 
 
 class ExCore2Sockets(Backend):
