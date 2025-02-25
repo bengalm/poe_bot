@@ -56,7 +56,9 @@ print(
 poe_bot = Poe2Bot(unique_id=UNIQUE_ID, remote_ip=REMOTE_IP)
 from utils.combat import InfernalistMinion
 poe_bot.combat_module.build = InfernalistMinion(poe_bot)
-panel = poe_bot.backend.getChaosPanel()
+# panel = poe_bot.backend.getChaosPanel()
+# panel = poe_bot.backend.getItemsOnGround()
+# panel11 = poe_bot.backend.getUltimatumNextWaveUi()
 # panel = poe_bot.backend.getVisibleUi()
 # print(f'pppp===={panel}')
 poe_bot.refreshAll()
@@ -86,9 +88,8 @@ def openWaypoint():
 
 def find_text_open(obj, text):
     results = []
-
     if isinstance(obj, dict):  # 处理字典
-        if obj.get("text") == text:
+        if text in obj.get("text"):
             results.append(obj)
         for key in obj:
             results.extend(find_text_open(obj[key], text))
@@ -251,19 +252,70 @@ def killMonster():
             time.sleep(random.randint(30, 50) / 100)
             break
 
+
+def selectChoose():
+    visibleUiJson = poe_bot.backend.getItemsOnGround()
+    findFirst=False
+    for s in chaos_const.choose_select_first:
+        text_open = find_text_open(visibleUiJson, s)
+        if text_open:
+            open_objects = text_open[0]
+            time.sleep(random.randint(1, 3))
+            pos_x, pos_y = open_objects["gp"][0], open_objects["gp"][1]
+            screen_pos_x, screen_pos_y = poe_bot.convertPosXY(pos_x, pos_y, safe=False)
+            time.sleep(random.randint(1, 3))
+            poe_bot.bot_controls.mouse.setPosSmooth(int(screen_pos_x), int(screen_pos_y), mouse_speed_mult=1)
+            time.sleep(random.randint(1, 3))
+            poe_bot.bot_controls.mouse.click()
+            findFirst=True
+            break
+
+    for s in chaos_const.choose_select:
+        text_open = find_text_open(visibleUiJson, s)
+        if text_open:
+            open_objects = text_open[0]
+            time.sleep(random.randint(1, 3))
+            pos_x, pos_y = open_objects["gp"][0], open_objects["gp"][1]
+            screen_pos_x, screen_pos_y = poe_bot.convertPosXY(pos_x, pos_y, safe=False)
+            time.sleep(random.randint(1, 3))
+            poe_bot.bot_controls.mouse.setPosSmooth(int(screen_pos_x), int(screen_pos_y), mouse_speed_mult=1)
+            time.sleep(random.randint(1, 3))
+            poe_bot.bot_controls.mouse.click()
+            findFirst=True
+            break
+
+    if not findFirst:
+        raise Exception("chooseSelect choose failed")
+    time.sleep(random.randint(1, 2))
+    text_open = find_text_open(visibleUiJson, "begin")
+    if text_open:
+        open_objects = text_open[0]
+        time.sleep(random.randint(1, 3))
+        pos_x, pos_y = open_objects["gp"][0], open_objects["gp"][1]
+        screen_pos_x, screen_pos_y = poe_bot.convertPosXY(pos_x, pos_y, safe=False)
+        time.sleep(random.randint(1, 3))
+        poe_bot.bot_controls.mouse.setPosSmooth(int(screen_pos_x), int(screen_pos_y), mouse_speed_mult=1)
+        time.sleep(random.randint(1, 3))
+        poe_bot.bot_controls.mouse.click()
+    else:
+        raise Exception("chooseSelect begin failed")
 # 打开传送
-# openWaypoint()
+#openWaypoint()
 #
 # poe_bot.refreshInstanceData()
 #
-#openChaosEntren()
-#time.sleep(random.randint(3, 4) )
-#findNpc()
+openChaosEntren()
+time.sleep(random.randint(3, 4) )
+GoAndClick(chaos_const.UltimatumSelector,False)
+# 选择
+selectChoose()
+#
 
-# visibleUiJson = poe_bot.backend.getVisibleUi()
-# GoAndClick("Metadata/Terrain/Gallows/Act3/3_10/Objects/LiftButton")
+# 第一关 下降台子
+visibleUiJson = poe_bot.backend.getVisibleUi()
+GoAndClick("Metadata/Terrain/Gallows/Act3/3_10/Objects/LiftButton",True)
 
-#killMonster()
+killMonster()
 #走到升旗平台
 GoAndClick(chaos_const.LiftButton_Platform,False)
 time.sleep(random.randint(30, 50) / 100)

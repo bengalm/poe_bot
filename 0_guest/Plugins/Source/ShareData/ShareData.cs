@@ -1707,9 +1707,9 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
         {
             DebugWindow.LogMsg($"{method.Name}=== (return: {method.ReturnType.Name})");
         }
-         if (choices_panel_object.IsVisible == false){
-            return chaos_panel;
-        }
+//         if (choices_panel_object.IsVisible == false){
+//            return chaos_panel;
+//        }
 
 //        var j=JsonConvert.SerializeObject(choices_panel_object, new JsonSerializerSettings{
 //            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
@@ -1723,9 +1723,9 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
         chaos_panel.choices=panel_choices;
         var cs = choices_panel_object.ChoiceElements;
         foreach (var e in cs){
-           DebugWindow.LogMsg($"chaosPanel cs {e.txt}");
+           DebugWindow.LogMsg($"chaosPanel cs {e.Text}");
            UltimatumPanelChoicesObj n=new UltimatumPanelChoicesObj();
-           n.name=e.Text
+           n.name=e.Text;
            try{
                 if (e.Center!=null)
                 {
@@ -1748,23 +1748,23 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
                 }catch(Exception ex){
                     DebugWindow.LogError($"Traverse error: {ex}");
                 }
-               chaos_panel.
+               chaos_panel.choices.Add(n);
         }
 
-        var csBtn =choices_panel_object.ConfirmButton;
+        var csBtn =GameController.IngameState.IngameUi.UltimatumPanel.ConfirmButton;
         if (csBtn!=null)
         {
-                    int f_x=(int)e.Center.X;
-                    int f_y=(int)e.Center.Y;
-                    n.grid_position =  [f_x , f_y];
-                     n.visible_button_screen_zone = new List<int> {
+                    int f_x=(int)csBtn.Center.X;
+                    int f_y=(int)csBtn.Center.Y;
+                    chaos_panel.grid_position =  [f_x , f_y];
+                     chaos_panel.button_screen_zone = new List<int> {
                         f_x,
-                        (int)(f_x+ e.Width),
+                        (int)(f_x+ csBtn.Width),
                        f_y,
-                        (int)(f_y + e.Height),
+                        (int)(f_y + csBtn.Height),
                        };
-                    }
-        }
+         }
+
 
         return chaos_panel;
     }
@@ -1851,7 +1851,7 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
                 }
                 n.is_active=e.IsActive;
                List<Element> list_children =e.Children.ToList();
-                if (list_children.Count > 1)
+                if (list_children.Count > 0)
                 {
                     foreach (var child in list_children)
                     {
@@ -1889,8 +1889,8 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
      var j=JsonConvert.SerializeObject(result, new JsonSerializerSettings{
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
           });
-          DebugWindow.LogMsg($"checking full {j}");
-          DebugWindow.LogMsg("checking full "+j);
+//          DebugWindow.LogMsg($"checking full {j}");
+//          DebugWindow.LogMsg("checking full "+j);
 //        DebugWindow.LogMsg($"checking full {visible_ui_object}");
 //        List<VisibleUi> children  = new List<VisibleUi>();
 //        visible_ui.datas=children;
@@ -1899,6 +1899,130 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
 //
 //           DebugWindow.LogMsg($"checking cs {tile.txt}");
 //        }
+
+        return result;
+    }
+
+    static VisibleUi ExtractItemsOnGround(Element obj)
+    {
+        VisibleUi result = new VisibleUi();
+        TraverseItemsOnGround(obj, result);
+        return result;
+    }
+    static void TraverseItemsOnGround(Element obj, VisibleUi result)
+    {
+        if (obj == null)
+        {
+          DebugWindow.LogMsg("Traverse obj null ---------");
+            return;
+        }
+        if (obj.Children==null||obj.Children.Count<1){
+           DebugWindow.LogMsg("Traverse Children null new ---------");
+            return;
+        }
+//        Type ot=obj.GetType();
+//       FieldInfo ot_c= ot.GetField("Children");
+//       if (ot_c == null)
+//       {
+//            DebugWindow.LogMsg("Traverse Children null ---------");
+//            return;
+//       }
+//       List<object> objList=ot_c.GetValue(obj) as List<object>;
+//        if (objList!=null||objList.Count<1)
+//        {
+//          DebugWindow.LogMsg("Traverse objList.Count<1 ---------");
+//            return;
+//        }
+
+     foreach (var e in obj.Children)
+     {
+//            Type type = e.GetType();
+//            bool isVisible = false;
+//
+//            FieldInfo field_text = type.GetField("Text");
+//            FieldInfo field_isVisible = type.GetField("IsVisible");
+//            FieldInfo field_isActive = type.GetField("IsActive");
+//            FieldInfo field_X = type.GetField("X");
+//            FieldInfo field_Y = type.GetField("Y");
+//            FieldInfo field_Children = type.GetField("Children");
+//
+//            isVisible= (bool)field_isVisible.GetValue(e);
+//
+//            DebugWindow.LogMsg($"Traverse foreach obj={e}---------");
+            bool isVisible = false;
+
+
+//            DebugWindow.LogMsg($"Traverse foreach obj={e}---------");
+            isVisible=e.IsVisible;
+            if (isVisible)
+            {
+                VisibleUi n=new VisibleUi();
+                n.is_visible=isVisible;
+                n.text=e.Text ;
+
+                if (e.Tooltip!=null)
+                {
+                    DebugWindow.LogMsg($"Traverse Tooltip={e.Tooltip.Children.Count}");
+                    if (e.Tooltip.Children.Count==2)
+                    {
+                   DebugWindow.LogMsg($"Traverse Tooltip={e.Tooltip.Children[1].Children.Count}");
+                       if(e.Tooltip.Children[1].Children.Count==4)
+                       {
+                          n.text=e.Tooltip.Children[1].Children[3].Text;
+                          DebugWindow.LogMsg($"Traverse Tooltip={n.text}");
+                       }
+                    }
+                }
+                try{
+                if (e.Center!=null)
+                {
+                    if (e.Center.X<0||e.Center.X>5000||e.Center.Y<0||e.Center.Y>5000)
+                    {
+                         DebugWindow.LogMsg("Traverse foreach center err");
+                    }else{
+                     DebugWindow.LogMsg($"Traverse foreach centerX={e.Center.X} centerY={e.Center.Y} {e.Center.GetType()}---------");
+                    int f_x=(int)e.Center.X;
+                    int f_y=(int)e.Center.Y;
+                    n.grid_position =  [f_x , f_y];
+                     n.visible_button_screen_zone = new List<int> {
+                        f_x,
+                        (int)(f_x+ e.Width),
+                       f_y,
+                        (int)(f_y + e.Height),
+                       };
+                    }
+
+                }
+                }catch(Exception ex){
+                    DebugWindow.LogError($"Traverse error: {ex}");
+                }
+                n.is_active=e.IsActive;
+               List<Element> list_children =e.Children.ToList();
+                if (list_children.Count > 0)
+                {
+                    foreach (var child in list_children)
+                    {
+                        TraverseItemsOnGround(child, n);
+                    }
+                }
+                result.children.Add(n);
+            }
+     }
+    }
+    public VisibleUi ItemsOnGround(){
+        VisibleUi visible_ui = new VisibleUi();
+        var visible_ui_object = GameController.IngameState.IngameUi.ItemsOnGroundLabelElement;
+        DebugWindow.LogMsg("GetVisibleUiObject-----");
+        DebugWindow.LogMsg($"GetVisibleUiObject----- Children Count={visible_ui_object.Children.Count}----");
+
+        // 执行转换
+        VisibleUi result = ExtractItemsOnGround(visible_ui_object);
+
+     var j=JsonConvert.SerializeObject(result, new JsonSerializerSettings{
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+          });
+          DebugWindow.LogMsg($"checking full {j}");
+
 
         return result;
     }
@@ -2036,7 +2160,8 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
                     return SerializeData(chaosPanel());
                 case "/getVisibleUi":
                     return SerializeData(VisibleUi());
-
+                case "/getItemsOnGround":
+                     return SerializeData(ItemsOnGround());
                 default:
                     return "Unknown request";
             }

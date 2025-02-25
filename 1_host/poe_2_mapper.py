@@ -66,7 +66,18 @@ MAPS_TO_IGNORE = [
 
 OILS_BY_TIERS = ["Distilled Ire", "Distilled Guilt", "Distilled Greed"]
 
-
+# TODO pick consumables or ensure that consumables are picked
+def identifyItems():
+    poe_bot.ui.inventory.update()
+    unidentified_items = list(filter(lambda m: m.identified is False, poe_bot.ui.inventory.items))
+    if len(unidentified_items) != 0:
+        doryani_entity = next(
+            (e for e in poe_bot.game_data.entities.all_entities if e.render_name == "Doryani"))
+        doryani_entity.click(hold_ctrl=True)
+        time.sleep(random.uniform(0.30, 0.60))
+    poe_bot.ui.npc_dialogue.update()
+    if poe_bot.ui.npc_dialogue.visible is True:
+        poe_bot.ui.closeAll()
 class MapperSettings:
     #
     atlas_explorer = False  # prefer to run higher tier maps over lower tier
@@ -360,6 +371,8 @@ class Mapper2(PoeBotComponent):
         activate map
         """
         poe_bot: Poe2Bot = self.poe_bot
+        if poe_bot.area_raw_name=="HideoutCanal":
+            identifyItems()
         poe_bot.ui.inventory.update()
         maps_in_inventory = self.getWaystonesCanUse(source="inventory")
         if len(maps_in_inventory) == 0:
@@ -656,6 +669,7 @@ class Mapper2(PoeBotComponent):
         if self.cache.stage == 0:
             # self.checkIfSessionEnded()
             self.doPreparations()
+            time.sleep(random.uniform(1, 2))
         if self.cache.stage == 1:
             self.activateMap()
         if self.cache.stage == 2:
@@ -1421,7 +1435,7 @@ mapper_settings = MapperSettings({})
 # adjust mapper settings below
 mapper_settings.do_rituals = False
 # mapper_settings.do_rituals_buyout_function =
-# mapper_settings.high_priority_maps = ["MapBluff"]
+mapper_settings.high_priority_maps = ["MapBluff"]
 mapper_settings.complete_tower_maps = False
 mapper_settings.min_map_tier = 13
 mapper_settings.anoint_maps = False
@@ -2308,24 +2322,7 @@ if need_to_modify_maps:
     inventory = self.poe_bot.ui.inventory
 
 
-    # TODO pick consumables or ensure that consumables are picked
-    def identifyItems():
-        poe_bot.ui.inventory.update()
-        unidentified_items = list(filter(lambda m: m.identified is False, poe_bot.ui.inventory.items))
-        if len(unidentified_items) != 0:
-            while True:
-                poe_bot.refreshInstanceData()
-                poe_bot.ui.inventory.update()
-                unidentified_items = list(filter(lambda m: m.identified is False, poe_bot.ui.inventory.items))
-                if len(unidentified_items) == 0:
-                    break
-                doryani_entity = next(
-                    (e for e in poe_bot.game_data.entities.all_entities if e.render_name == "Doryani"))
-                doryani_entity.click(hold_ctrl=True)
-                time.sleep(random.uniform(0.30, 0.60))
-            poe_bot.ui.npc_dialogue.update()
-            if poe_bot.ui.npc_dialogue.visible is True:
-                poe_bot.ui.closeAll()
+
 
 
     identifyItems()

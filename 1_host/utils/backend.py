@@ -232,6 +232,8 @@ class Backend:
       return self._endpoint_request("getChaosPanel")
   def getVisibleUi(self):
         return self._endpoint_request("getVisibleUi")
+  def getItemsOnGround(self):
+        return self._endpoint_request("getItemsOnGround")
 
 
 class ExCore2Sockets(Backend):
