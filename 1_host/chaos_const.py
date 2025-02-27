@@ -23,12 +23,13 @@ UltimatumSelector="Metadata/Terrain/Gallows/Act3/3_10/Objects/UltimatumSelector"
 # 起来的平台
 LiftPlatform='Metadata/Terrain/Gallows/Act3/3_10/Objects/LiftPlatform'
 LiftButton_Platform='Metadata/Terrain/Gallows/Act3/3_10/Objects/LiftButton_Platform'
-
 #
 #'Metadata/Terrain/Gallows/Act3/3_10/Objects/UltimatumSelector'
-
-
-
+WorldItem='Metadata/MiscellaneousObjects/WorldItem'
+# 血圈
+BloodCircle='Metadata/Terrain/Gallows/Act3/3_10/Objects/BloodAltarEncounter/BloodCircle'
+# 飞 像
+BloodCircle='Metadata/Terrain/Gallows/Act3/3_10/Objects/StatueEncounter/EncounterStatue'
 
 choose_select=[
     'Reduced Recovery',#減少回復 #減少 40% 生命、魔力和能量護盾恢復率

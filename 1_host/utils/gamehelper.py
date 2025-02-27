@@ -916,6 +916,7 @@ class Entities:
     self.npcs: List[Entity] = []
     self.town_portals: List[Entity] = []
     self.coffins: List[Entity] = []
+    self.terrain: List[Entity] = []
 
   def update(self, refreshed_data: dict):
     self.reset()
@@ -966,6 +967,8 @@ class Entities:
           self.pickable_items.append(entity)
       elif entity.type == "TownPortal":
         self.town_portals.append(entity)
+      elif entity.type== "Terrain":
+        self.terrain.append(entity)
       self.all_entities.append(entity)
 
   def getCorpsesArountPoint(self, grid_pos_x, grid_pos_y, radius=25):

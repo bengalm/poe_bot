@@ -767,6 +767,21 @@ class Mover:
     # self.grid_pos_to_step_x = None
     # self.grid_pos_to_step_y = None
 
+  def moveForwardByCurrentAngle(self, distance):
+    # Get the current position and angle
+    current_pos = self.poe_bot.game_data.player.grid_pos.toList()
+    target_pos = [current_pos[0] + distance, current_pos[1]]  # Adjust this to your context
+
+    # Calculate the angle of the line from the current position to the target position
+    current_angle = angleOfLine(current_pos, target_pos)
+
+    # Calculate the target position based on the current angle and distance
+    final_target_pos = pointOnCircleByAngleAndLength(current_angle, distance, current_pos)
+
+    # Move to the target position
+    self.goToPoint(final_target_pos,min_distance=20, release_mouse_on_end=True)
+    self.stopMoving()
+
 
 MOVEMENT_KEYS = ["DIK_A", "DIK_W", "DIK_D", "DIK_S"]
 

@@ -80,7 +80,7 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
     {
         int httpPort = 50005;
         HttpListener listener = new HttpListener();
-        listener.Prefixes.Add($"http://*:{httpPort}/");
+        listener.Prefixes.Add($"http:/:{httpPort}/");
         listener.Start();
         DebugWindow.LogMsg($"HTTP server started on port {httpPort}...");
 
@@ -240,7 +240,8 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
     }
     public List<Entity_c> getAwakeEntities(){
         List<Entity_c> awake_entities = new List<Entity_c>();
-        foreach (var obj in GameController.EntityListWrapper.OnlyValidEntities)
+//        foreach (var obj in GameController.EntityListWrapper.OnlyValidEntities) todo ---
+        foreach (var obj in GameController.EntityListWrapper.Entities)
         {
             // ignore invalid or temp objects
             if (obj.IsValid != true){
@@ -2011,20 +2012,99 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
     }
     public VisibleUi ItemsOnGround(){
         VisibleUi visible_ui = new VisibleUi();
-        var visible_ui_object = GameController.IngameState.IngameUi.ItemsOnGroundLabelElement;
-        DebugWindow.LogMsg("GetVisibleUiObject-----");
-        DebugWindow.LogMsg($"GetVisibleUiObject----- Children Count={visible_ui_object.Children.Count}----");
+//
+//        var visible_ui_object = GameController.IngameState.IngameUi.ItemsOnGroundLabelElement;
+//        DebugWindow.LogMsg("GetVisibleUiObject-----");
+//        DebugWindow.LogMsg($"GetVisibleUiObject----- Children Count={visible_ui_object.Children.Count}----");
+//
+//        // 执行转换
+//        VisibleUi result = ExtractItemsOnGround(visible_ui_object);
+//
+//     var j=JsonConvert.SerializeObject(result, new JsonSerializerSettings{
+//                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+//          });
+//          DebugWindow.LogMsg($"checking full {j}");
 
-        // 执行转换
-        VisibleUi result = ExtractItemsOnGround(visible_ui_object);
 
-     var j=JsonConvert.SerializeObject(result, new JsonSerializerSettings{
+         //8-0-0-1-0-0-3-0-0-1-1-3
+         //8-0-0-1-0-0-3-0-1-1-1-3
+         //8-0-0-1-0-0-3-0-2-1-1-3
+        try{
+        int iii=0;
+        for (int i = 0; i < 3; i++)
+        {
+             bool dd=false;
+            for(int jj=0;jj<3;jj++)
+            {
+                 if (dd)
+                {
+                break;
+                }
+             try{
+                var ee = GameController.IngameState.IngameUi.Root.Children[1].Children[8].Children[0].Children[0].Children[jj].Children[0].Children[0].Children[3].Children[0].Children[i];
+                VisibleUi n=new VisibleUi();
+                n.text=ee.Tooltip.Children[1].Children[3].Text;
+                DebugWindow.LogMsg($"Traverse foreach {i} =={ee.Text}---------");
+                if (ee.Center!=null)
+                {
+                    if (ee.Center.X<0||ee.Center.X>5000||ee.Center.Y<0||ee.Center.Y>5000)
+                    {
+                         DebugWindow.LogMsg("Traverse foreach center err");
+                    }else{
+                     DebugWindow.LogMsg($"Traverse foreach centerX={ee.Center.X} centerY={ee.Center.Y} {ee.Center.GetType()}---------");
+                    int f_x=(int)ee.Center.X;
+                    int f_y=(int)ee.Center.Y;
+                    n.grid_position =  [f_x , f_y];
+                     n.visible_button_screen_zone = new List<int> {
+                        f_x,
+                        (int)(f_x+ee.Width),
+                       f_y,
+                        (int)(f_y + ee.Height),
+                       };
+                    }
+                }
+                visible_ui.children.Add(n);
+                dd=true;
+                iii=jj;
+             } catch (Exception d1){
+                 DebugWindow.LogMsg($"Traverse foreach  err {jj}");
+             }
+            }
+
+        }
+
+             // btn
+                var e = GameController.IngameState.IngameUi.Root.Children[1].Children[8].Children[0].Children[0].Children[iii].Children[0].Children[0].Children[5].Children[0].Children[0];
+                visible_ui.text=e.Text;
+                DebugWindow.LogMsg($"Traverse foreach btn =={e.Text}---------");
+                if (e.Center!=null)
+                {
+                    if (e.Center.X<0||e.Center.X>5000||e.Center.Y<0||e.Center.Y>5000)
+                    {
+                         DebugWindow.LogMsg("Traverse foreach center err");
+                    }else{
+                     DebugWindow.LogMsg($"Traverse foreach centerX={e.Center.X} centerY={e.Center.Y} {e.Center.GetType()}---------");
+                    int f_x=(int)e.Center.X;
+                    int f_y=(int)e.Center.Y;
+                    visible_ui.grid_position =  [f_x , f_y];
+                    visible_ui.visible_button_screen_zone = new List<int> {
+                        f_x,
+                        (int)(f_x+ e.Width),
+                       f_y,
+                        (int)(f_y + e.Height),
+                       };
+                    }
+                }
+              } catch (Exception d1){
+                                DebugWindow.LogMsg("Traverse foreach btn err ");
+             }
+
+
+        var j=JsonConvert.SerializeObject(visible_ui, new JsonSerializerSettings{
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
           });
           DebugWindow.LogMsg($"checking full {j}");
-
-
-        return result;
+        return visible_ui;
     }
 
     private string ProcessRequest(string rawRequest)

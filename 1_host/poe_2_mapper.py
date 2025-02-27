@@ -745,7 +745,7 @@ class Mapper2(PoeBotComponent):
                 None,
             )
             if delirium_mirror:
-                DeliriumEncounter(delirium_mirror).doEncounter()
+                DeliriumEncounter(poe_bot,delirium_mirror).doEncounter()
                 mapper.cache.delirium_mirror_activated = True
                 mapper.cache.save()
                 return True
