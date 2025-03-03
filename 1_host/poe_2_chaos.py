@@ -69,9 +69,6 @@ poe_bot.refreshAll()
 # TODO move it to poe_bot.refreshAll() refreshed_data["c_t"] ## "c_t":0 - mouse || "c_t":1 - wasd
 poe_bot.mover.setMoveType("wasd")
 
-
-poe_bot.mover.moveForwardByCurrentAngle(100)
-
 # set up loot filter
 from utils.loot_filter import PickableItemLabel
 
@@ -136,6 +133,7 @@ poe_bot.ui.inventory.update()
 
 # remove line below in case you want it to pick ALL items
 poe_bot.loot_picker.loot_filter.special_rules = [isItemHasPickableKey]
+
 
 # open portal and enter it
 def openWaypoint():
@@ -257,6 +255,7 @@ def openChaosEntren():
 
 
 def GoAndClick(path, click):
+    poe_bot.refreshInstanceData()
     waypoint5_entity = next((e for e in poe_bot.game_data.entities.all_entities if
                              e.path == path), None)
     if waypoint5_entity:
@@ -302,31 +301,26 @@ def killMonster():
         point = poe_bot.mover.goToEntitysPoint(rares_,
                                                release_mouse_on_end=True)
         time.sleep(random.randint(1, 2))
-    while True:
-        time.sleep(random.randint(30, 50) / 100)
-        poe_bot.refreshInstanceData()
         mob_to_kill = next(
-            (e for e in poe_bot.game_data.entities.attackable_entities if e.isOnPassableZone()), None)
-        if mob_to_kill:
-            res = True
-            while res is not None:
-                res = poe_bot.mover.goToEntitysPoint(mob_to_kill,
-                                                     custom_break_function=poe_bot.loot_picker.collectLoot)
-                mob_to_kill = next(
-                    (e for e in poe_bot.game_data.entities.attackable_entities if
-                     e.id == mob_to_kill.id and e.isOnPassableZone()), None
-                )
-                if mob_to_kill is None:
-                    continue
+            (e for e in poe_bot.game_data.entities.attackable_entities if True), None)
+        while mob_to_kill:
+            poe_bot.refreshInstanceData()
+            poe_bot.mover.goToEntitysPoint(mob_to_kill,
+                                                 custom_break_function=poe_bot.loot_picker.collectLoot)
+            mob_to_kill = next(
+                (e for e in poe_bot.game_data.entities.attackable_entities if
+                 e.id == mob_to_kill.id if True), None
+            )
+            if mob_to_kill is None:
+                break
             if mob_to_kill is not None:
                 poe_bot.combat_module.killUsualEntity(mob_to_kill)
-
-        else:
             time.sleep(random.randint(30, 50) / 100)
-            break
 
 
-def selectChoose():
+
+
+def selectChoose(i):
     visibleUiJson = poe_bot.backend.getItemsOnGround()
     findFirst = False
     for s in chaos_const.choose_select_first:
@@ -357,7 +351,10 @@ def selectChoose():
                 findFirst = True
                 break
     if not findFirst:
-        raise Exception("chooseSelect choose failed")
+        if i > 1:
+            raise Exception("chooseSelect choose failed")
+        i = i + 1
+        selectChoose(i)
     time.sleep(random.randint(1, 2))
     text_open = find_text_open(visibleUiJson, "begin")
     if text_open:
@@ -370,8 +367,66 @@ def selectChoose():
         time.sleep(random.randint(1, 3))
         poe_bot.bot_controls.mouse.click()
     else:
-        raise Exception("chooseSelect begin failed")
+        if i > 1:
+            raise Exception("chooseSelect begin failed")
+        i = i + 1
+        selectChoose(i)
 
+
+def enter():
+    try:
+        GoAndClick(chaos_const.LiftButton, True)
+    except Exception as eeee:
+        print(f'GoAndClick LiftButton=={eeee}')
+    try:
+        GoAndClick(chaos_const.LiftButton_Platform, False)
+    except Exception as eeee:
+        print(f'GoAndClick LiftButton_Platform=={eeee}')
+
+
+def exit():
+    try:
+        GoAndClick(chaos_const.LiftMovementController_UpDisabledUntilComplete, False)
+        time.sleep(random.randint(30, 50) / 100)
+    except Exception as eeee:
+        print(f'GoAndClick exit LiftMovementController_UpDisabledUntilComplete=={eeee}')
+    try:
+        poe_bot.mover.moveForwardByCurrentAngle(50)
+        GoAndClick(chaos_const.DoorExit, False)
+        time.sleep(random.randint(1, 2))
+        poe_bot.mover.moveForwardByCurrentAngle(300)
+    except Exception as eeee:
+        print(f'GoAndClick exit DoorExit=={eeee}')
+        poe_bot.mover.moveForwardByCurrentAngle(300)
+
+
+
+def findSelect(i):
+    if i > 10:
+        raise Exception("findSelect failed")
+    poe_bot.mover.moveForwardByCurrentAngle(300)
+    try:
+        GoAndClick(chaos_const.UltimatumSelector, False)
+        time.sleep(random.randint(30, 50) / 100)
+    except Exception as eeee:
+        print(f'GoAndClick exit UltimatumSelector=={eeee}')
+        i = i + 1
+        findSelect(i)
+
+
+def flow():
+    i = 10
+    y = 0
+    while i != 0:
+        poe_bot.refreshInstanceData()
+        waypoint5_entity = next((e for e in poe_bot.game_data.entities.all_entities if
+                                 e.path == chaos_const.EncounterStatue), None)
+        if waypoint5_entity:
+            poe_bot.mover.goToEntitysPoint(waypoint5_entity, min_distance=20, release_mouse_on_end=True)
+            if y == waypoint5_entity.grid_position.y:
+                i = i - 1
+            y = waypoint5_entity.grid_position.y
+            time.sleep(random.randint(1, 2))
 
 def goUi():
     poe_bot.mover.goToPoint([800, 2000], min_distance=10, release_mouse_on_end=True)
@@ -385,6 +440,8 @@ def goUi():
     #     poe_bot.mover.goToPoint([pos_x,pos_y], min_distance=10, release_mouse_on_end=True)
     # else:
     #     goUi()
+
+
 # 打开传送
 # openWaypoint()
 #
@@ -395,40 +452,76 @@ def goUi():
 #     time.sleep(random.randint(3, 4))
 #     poe_bot.refreshAll()
 # poe_bot.refreshInstanceData()
-GoAndClick(chaos_const.UltimatumSelector, False)
-# 选择
-selectChoose()
+#前进
+# poe_bot.mover.moveForwardByCurrentAngle(300)
+# time.sleep(random.randint(1, 2))
+# GoAndClick(chaos_const.UltimatumSelector, False)
+# #选择
+# selectChoose(0)
+# #
+# #前进
+# time.sleep(random.randint(1, 2))
+# poe_bot.mover.moveForwardByCurrentAngle(50)
+# # 第一关 下降台子
 #
-
-# 第一关 下降台子
-# visibleUiJson = poe_bot.backend.getVisibleUi()
-
-
-time.sleep(random.randint(1, 2))
-GoAndClick(chaos_const.LiftButton, True)
-try:
-    GoAndClick(chaos_const.LiftButton_Platform, True)
-except Exception as eeee:
-    print(f'eeee=={eeee}')
-
 #
+# time.sleep(random.randint(1, 2))
+# try:
+#     GoAndClick(chaos_const.LiftButton, True)
+# except Exception as eeee:
+#     print(f'GoAndClick LiftButton=={eeee}')
+# try:
+#     GoAndClick(chaos_const.LiftButton_Platform, True)
+# except Exception as eeee:
+#     print(f'GoAndClick LiftButton_Platform=={eeee}')
+#
+# #
+# time.sleep(random.randint(50, 80)/100)
+# poe_bot.mover.moveForwardByCurrentAngle(50)
+# 杀怪
 killMonster()
 time.sleep(random.randint(1, 2))
-
-# 走到升旗平台
-GoAndClick(chaos_const.LiftButton_Platform, False)
-time.sleep(random.randint(30, 50) / 100)
-GoAndClick(chaos_const.DoorExit,False)
-time.sleep(random.randint(1, 2))
-poe_bot.refreshInstanceData()
-GoAndClick(chaos_const.UltimatumNPC,False)
+#走到升旗平台
+# GoAndClick(chaos_const.LiftMovementController_UpDisabledUntilComplete, False)
+# time.sleep(random.randint(30, 50) / 100)
+# poe_bot.mover.moveForwardByCurrentAngle(50)
 #
-# goUi()
-# GoAndClick(chaos_const.UltimatumSelector, False)
-
+exit()
+# GoAndClick(chaos_const.DoorExit,False)
 # time.sleep(random.randint(1, 2))
-# selectChoose()
 
+poe_bot.mover.moveForwardByCurrentAngle(300)
+time.sleep(random.randint(1, 2))
+GoAndClick(chaos_const.UltimatumSelector,False)
+# 选择
+selectChoose(0)
+time.sleep(random.randint(1, 2))
+GoAndClick(chaos_const.DoorUltimatum, False)
+time.sleep(random.randint(1, 2))
+poe_bot.mover.moveForwardByCurrentAngle(300)
+#进入第二关
+enter()
+#点击 时间开关
+GoAndClick(chaos_const.SurvivalEncounterTimer, True)
+time.sleep(2*65)
+exit()
+
+time.sleep(random.randint(1, 2))
+findSelect(1)
+selectChoose(0)
+time.sleep(random.randint(1, 2))
+GoAndClick(chaos_const.DoorUltimatum, False)
+time.sleep(random.randint(1, 2))
+# 进入第三关
+enter()
+flow()
+exit()
+time.sleep(random.randint(1, 2))
+findSelect(1)
+selectChoose(0)
+time.sleep(random.randint(1, 2))
+GoAndClick(chaos_const.DoorUltimatum, False)
+enter()
 raise 404
 
 test_entity = next(

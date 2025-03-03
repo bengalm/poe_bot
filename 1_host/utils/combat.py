@@ -3273,7 +3273,7 @@ class InfernalistMinion(Build):
 
         self.useFlasks()
 
-        min_distance = 35  # distance which is ok to start attacking
+        min_distance = 25  # distance which is ok to start attacking
         keep_distance = 25  # if our distance is smth like this, kite
         critical_distance = 15
         distance_range = 5

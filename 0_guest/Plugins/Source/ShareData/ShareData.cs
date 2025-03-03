@@ -2041,7 +2041,8 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
                 break;
                 }
              try{
-                var ee = GameController.IngameState.IngameUi.Root.Children[1].Children[8].Children[0].Children[0].Children[jj].Children[0].Children[0].Children[3].Children[0].Children[i];
+                  var ee = GameController.IngameState.IngameUi.Root.Children[1].Children[8].Children[0].Children[0].Children[jj].Children[0].Children[0].Children[3].Children[0].Children[i];
+//                var ee = GameController.IngameState.IngameUi.ItemsOnGroundLabelElement.Children[0].Children[jj].Children[0].Children[0].Children[3].Children[0].Children[i];
                 VisibleUi n=new VisibleUi();
                 n.text=ee.Tooltip.Children[1].Children[3].Text;
                 DebugWindow.LogMsg($"Traverse foreach {i} =={ee.Text}---------");
@@ -2069,10 +2070,42 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
              } catch (Exception d1){
                  DebugWindow.LogMsg($"Traverse foreach  err {jj}");
              }
+             if (!dd){
+             try{
+                var ee = GameController.IngameState.IngameUi.ItemsOnGroundLabelElement.Children[0].Children[jj].Children[0].Children[0].Children[3].Children[0].Children[i];
+                VisibleUi n=new VisibleUi();
+                n.text=ee.Tooltip.Children[1].Children[3].Text;
+                DebugWindow.LogMsg($"Traverse foreach {i} =={ee.Text}---------");
+                if (ee.Center!=null)
+                {
+                    if (ee.Center.X<0||ee.Center.X>5000||ee.Center.Y<0||ee.Center.Y>5000)
+                    {
+                         DebugWindow.LogMsg("Traverse foreach center err");
+                    }else{
+                     DebugWindow.LogMsg($"Traverse foreach centerX={ee.Center.X} centerY={ee.Center.Y} {ee.Center.GetType()}---------");
+                    int f_x=(int)ee.Center.X;
+                    int f_y=(int)ee.Center.Y;
+                    n.grid_position =  [f_x , f_y];
+                     n.visible_button_screen_zone = new List<int> {
+                        f_x,
+                        (int)(f_x+ee.Width),
+                       f_y,
+                        (int)(f_y + ee.Height),
+                       };
+                    }
+                }
+                visible_ui.children.Add(n);
+                dd=true;
+                iii=jj;
+             } catch (Exception d1){
+                 DebugWindow.LogMsg($"Traverse foreach  err {jj}");
+             }
+             }
+
             }
 
         }
-
+            try{
              // btn
                 var e = GameController.IngameState.IngameUi.Root.Children[1].Children[8].Children[0].Children[0].Children[iii].Children[0].Children[0].Children[5].Children[0].Children[0];
                 visible_ui.text=e.Text;
@@ -2095,9 +2128,41 @@ public class ShareData : BaseSettingsPlugin<ShareDataSettings>
                        };
                     }
                 }
-              } catch (Exception d1){
-                                DebugWindow.LogMsg("Traverse foreach btn err ");
-             }
+            }catch (Exception x){
+                 DebugWindow.LogMsg($"Traverse btn  err");
+            }
+            try{
+             // btn
+                var e =  GameController.IngameState.IngameUi.ItemsOnGroundLabelElement.Children[0].Children[iii].Children[0].Children[0].Children[5].Children[0].Children[0];
+                visible_ui.text=e.Text;
+                DebugWindow.LogMsg($"Traverse foreach btn =={e.Text}---------");
+                if (e.Center!=null)
+                {
+                    if (e.Center.X<0||e.Center.X>5000||e.Center.Y<0||e.Center.Y>5000)
+                    {
+                         DebugWindow.LogMsg("Traverse foreach center err");
+                    }else{
+                     DebugWindow.LogMsg($"Traverse foreach centerX={e.Center.X} centerY={e.Center.Y} {e.Center.GetType()}---------");
+                    int f_x=(int)e.Center.X;
+                    int f_y=(int)e.Center.Y;
+                    visible_ui.grid_position =  [f_x , f_y];
+                    visible_ui.visible_button_screen_zone = new List<int> {
+                        f_x,
+                        (int)(f_x+ e.Width),
+                       f_y,
+                        (int)(f_y + e.Height),
+                       };
+                    }
+                }
+            }catch (Exception x){
+                 DebugWindow.LogMsg($"Traverse btn  err");
+            }
+
+
+
+      } catch (Exception d1){
+         DebugWindow.LogMsg("Traverse  err ");
+     }
 
 
         var j=JsonConvert.SerializeObject(visible_ui, new JsonSerializerSettings{

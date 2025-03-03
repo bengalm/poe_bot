@@ -1082,12 +1082,45 @@ class MapDevice_Poe2(MapDevice):
         break
       print(f"map_obj.screen_pos {map_obj.screen_pos.toList()}")
       drag_from = poe_bot.game_window.convertPosXY(map_obj.screen_pos.x, map_obj.screen_pos.y, custom_borders=borders)
-
-      drag_to = poe_bot.game_window.convertPosXY(x_center, poe_bot.game_window.center_point[1], custom_borders=borders)
+      print(f'drag to {x_center}----{poe_bot.game_window.center_point[1]-200}-------')
+      drag_to = poe_bot.game_window.convertPosXY(x_center, poe_bot.game_window.center_point[1]-200, custom_borders=borders)
       poe_bot.bot_controls.mouse.drag(drag_from, drag_to)
       time.sleep(random.uniform(0.15, 0.35))
 
     return map_obj
+  def moveScreenToXy(self):
+    poe_bot = self.poe_bot
+    # map_obj = random.choice(poe_bot.ui.map_device.avaliable_maps)
+    map_is_in_roi = poe_bot.game_window.isInRoi(self.place_map_window_activate_button_screen_zone.x1, self.place_map_window_activate_button_screen_zone.y1)
+    while map_is_in_roi is False:
+      self.update()
+      poe_bot.ui.inventory.update()
+      # ignore the inventory panel if it's opened
+      x_center = poe_bot.game_window.center_point[0]
+      borders = poe_bot.game_window.borders[:]
+      borders[2] = 80
+      if poe_bot.ui.inventory.is_opened:
+        print("inventory is opened, different borders and roi")
+        borders[1] = 545
+        x_center = int(x_center) / 2
+      roi_borders = [
+        int((borders[0] + borders[1]) / 2 - 100),
+        int((borders[0] + borders[1]) / 2 + 100),
+        int((borders[2] + borders[3]) / 2 - 200),
+        int((borders[2] + borders[3]) / 2 + 100),
+      ]
+      print(f"roi borders {roi_borders}")
+      print(f"borders {borders}")
+
+      map_is_in_roi = poe_bot.game_window.isInRoi(self.place_map_window_activate_button_screen_zone.x1, self.place_map_window_activate_button_screen_zone.y1)
+      if map_is_in_roi:
+        break
+      print(f"map_obj.screen_pos {self.place_map_window_activate_button_screen_zone.toList()}")
+      drag_from = poe_bot.game_window.convertPosXY(poe_bot.game_window.center_point[0], poe_bot.game_window.center_point[1], custom_borders=borders)
+      print(f'drag to {drag_from} to {x_center}----{poe_bot.game_window.center_point[1]-200}-------')
+      drag_to = poe_bot.game_window.convertPosXY(x_center, poe_bot.game_window.center_point[1]-200, custom_borders=borders)
+      poe_bot.bot_controls.mouse.drag(drag_from, drag_to)
+      time.sleep(random.uniform(0.4, 0.8))
 
   def open(self):
     def getMapDeviceEntity():

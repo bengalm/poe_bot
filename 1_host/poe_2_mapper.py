@@ -60,7 +60,11 @@ MAPS_TO_IGNORE = [
     "MapSunTemple_NoBoss",  # 'MapSunTemple'
     "MapSunTemple",  # 'MapSunTemple'
     "MapUniqueVault",  # 'MapUniqueVault'
+    "MapAlpineRidge",  # 'MapUniqueVault'
     "MapUberBoss_StoneCitadel",  # 'MapUberBoss_StoneCitadel'
+    "MapUberBoss_CopperCitadel",  # 'MapUberBoss_StoneCitadel'
+    "MapVaalFactory_NoBoss",  # 'MapVaalFactory_NoBoss'
+    "MapVaalFactory",  # 'MapVaalFactory'
 
 ]
 
@@ -405,7 +409,7 @@ class Mapper2(PoeBotComponent):
         # for m in possible_to_run_maps: print(m.raw)
 
         map_obj = possible_to_run_maps[0]
-        print(f"[Mapper.activateMap] going to run map {map_obj.raw}")
+        # print(f"[Mapper.activateMap] going to run map {map_obj.raw}")
         poe_bot.ui.map_device.moveScreenTo(map_obj)
         time.sleep(random.uniform(0.15, 0.35))
         poe_bot.ui.map_device.update()
@@ -442,7 +446,11 @@ class Mapper2(PoeBotComponent):
                     "[Mapper.activateMap] cant open dropdown for map device #TODO click on other map element in roi and try again?")
                 poe_bot.raiseLongSleepException("[Mapper.activateMap] cant open dropdown for map device #?")
         poe_bot.ui.map_device.update()
+        poe_bot.ui.map_device.moveScreenToXy()
+        poe_bot.ui.map_device.update()
 
+        poe_bot.bot_controls.releaseAll()
+        time.sleep(random.uniform(0.8, 1.2))
         print("[Mapper.activateMap] dropdown opened")
         if len(poe_bot.ui.map_device.place_map_window_items) != 0:
             poe_bot.raiseLongSleepException(
@@ -454,7 +462,7 @@ class Mapper2(PoeBotComponent):
 
         print(f"[Mapper.activateMap] placing map {map_to_run.raw}")
         map_to_run.click(hold_ctrl=True)
-        time.sleep(random.uniform(0.4, 1.2))
+        time.sleep(random.uniform(0.8, 1.2))
 
         poe_bot.ui.map_device.update()
         poe_bot.ui.map_device.checkIfActivateButtonIsActive()
@@ -651,6 +659,22 @@ class Mapper2(PoeBotComponent):
             print(
                 f"[Mapper.isMapCompleted] poe_bot.game_data.map_info.map_completed {poe_bot.game_data.map_info.map_completed}")
             return False
+        mob_to_kill = next(
+            (e for e in poe_bot.game_data.entities.attackable_entities_rares if True), None)
+        # (e for e in poe_bot.game_data.entities.attackable_entities_rares if e.isOnPassableZone()), None)
+        while mob_to_kill:
+            poe_bot.refreshInstanceData()
+            res = poe_bot.mover.goToEntitysPoint(mob_to_kill,
+                                                 custom_break_function=poe_bot.loot_picker.collectLoot)
+            print(f'kill rare {mob_to_kill} {res}')
+            mob_to_kill = next(
+                (e for e in poe_bot.game_data.entities.attackable_entities_rares if True), None
+                # e.id == mob_to_kill.id and e.isOnPassableZone()), None
+            )
+            if mob_to_kill is None:
+                break
+            if mob_to_kill is not None:
+                poe_bot.combat_module.killUsualEntity(mob_to_kill)
         if self.settings.do_rituals is True:
             poe_bot.ui.ritual_ui.update()
             if poe_bot.ui.ritual_ui.ritual_button is not None:
@@ -753,6 +777,19 @@ class Mapper2(PoeBotComponent):
         # TODO, supposed to step on those shard packs to open them
         # Metadata/Monsters/LeagueDelirium/DoodadDaemons/DoodadDaemonShardPack<smth> or 1 only is metadata key for those things
         if settings.force_deli:
+            # delirium_mirror_monster = next(
+            #     (
+            #         e
+            #         for e in poe_bot.game_data.entities.all_entities
+            #         if
+            #         # e.path == "Metadata/Monsters/LeagueDelirium/DoodadDaemons/DoodadDaemonShardPack1" and e.isOnPassableZone()
+            #         e.path == "Metadata/Monsters/LeagueDelirium/DoodadDaemons/DoodadDaemonShardPack1"
+            #     ),
+            #     None,
+            # )
+            # if delirium_mirror_monster:
+            #     print(f'mirror_monster ------------')
+            #     poe_bot.mover.goToEntitysPoint(delirium_mirror_monster, min_distance=10)
             pass
 
         # TODO custom break function to check if there are any other activators which are closer on our way
@@ -768,16 +805,17 @@ class Mapper2(PoeBotComponent):
                 return True
         if settings.force_kill_rares is not False:
             mob_to_kill = next(
-                (e for e in poe_bot.game_data.entities.attackable_entities_rares if True), None)
-                # (e for e in poe_bot.game_data.entities.attackable_entities_rares if e.isOnPassableZone()), None)
+                # (e for e in poe_bot.game_data.entities.attackable_entities_rares if True), None)
+                (e for e in poe_bot.game_data.entities.attackable_entities_rares if e.isOnPassableZone()), None)
             if mob_to_kill:
                 res = True
                 while res is not None:
                     res = poe_bot.mover.goToEntitysPoint(mob_to_kill,
                                                          custom_break_function=poe_bot.loot_picker.collectLoot)
+                    poe_bot.refreshInstanceData()
                     mob_to_kill = next(
-                        (e for e in poe_bot.game_data.entities.attackable_entities_rares if
-                         e.id == mob_to_kill.id and e.isOnPassableZone()), None
+                        (e for e in poe_bot.game_data.entities.attackable_entities_rares if True), None
+                         # e.id == mob_to_kill.id and e.isOnPassableZone()), None
                     )
                     if mob_to_kill is None:
                         break
@@ -971,17 +1009,30 @@ class Mapper2(PoeBotComponent):
             point_to_run_around = [self.poe_bot.game_data.player.grid_pos.x, self.poe_bot.game_data.player.grid_pos.y]
             # make sure it wont activate the tower
             if self.settings.complete_tower_maps is False:
+                # pass
                 tower_activator_entity = next(
                     (e for e in poe_bot.game_data.entities.all_entities if
                      e.path == "Metadata/MiscellaneousObjects/Endgame/TowerCompletion"), None
                 )
                 if tower_activator_entity:
+                    print(f'TowerCompletion-------')
                     point_to_run_around = poe_bot.game_data.terrain.pointToRunAround(
                         point_to_run_around_x=tower_activator_entity.grid_position.x,
                         point_to_run_around_y=tower_activator_entity.grid_position.y,
                         distance_to_point=75,
                         reversed=rev,
                     )
+                    print(f'go go go TowerCompletion-------')
+                    poe_bot.mover.goToEntitysPoint(tower_activator_entity, min_distance=20, release_mouse_on_end=True)
+                    pos_x = tower_activator_entity.location_on_screen.x
+                    pos_y = tower_activator_entity.location_on_screen.y
+                    pos_x, pos_y = poe_bot.convertPosXY(pos_x, pos_y, safe=False)
+                    # 点击dw
+                    poe_bot.bot_controls.mouse.setPosSmooth(pos_x, pos_y)
+                    time.sleep(random.randint(3, 5))
+                    poe_bot.bot_controls.mouse.click()
+                    time.sleep(random.randint(2, 3))
+
             killed_someone = poe_bot.combat_module.clearLocationAroundPoint(
                 {"X": point_to_run_around[0], "Y": point_to_run_around[1]}, detection_radius=50)
             res = self.exploreRoutine()
@@ -1011,10 +1062,14 @@ class Mapper2(PoeBotComponent):
         random_click_iter = 0
         can_click_portal_after = time.time()
         while True:
+            j=0
             while True:
+                j+=1
                 poe_bot.refreshInstanceData()
                 res = poe_bot.loot_picker.collectLoot()
                 if res is False:
+                    break
+                if j>20:
                     break
             if poe_bot.game_data.invites_panel_visible is not False:
                 print("[Mapper.onMapFinishedFunction] already loading")
@@ -1436,8 +1491,8 @@ mapper_settings = MapperSettings({})
 mapper_settings.do_rituals = False
 # mapper_settings.do_rituals_buyout_function =
 mapper_settings.high_priority_maps = ["MapBluff"]
-mapper_settings.complete_tower_maps = False
-mapper_settings.min_map_tier = 13
+# mapper_settings.complete_tower_maps = False
+mapper_settings.min_map_tier = 8
 mapper_settings.anoint_maps = False
 
 # In[ ]:
@@ -1468,16 +1523,37 @@ ARTS_TO_PICK = ["Art/2DItems/Maps/DeliriumSplinter.dds",
                 "Art/2DItems/Currency/CurrencyWeaponMagicQuality.dds",  # 打动 Arcanist's Etcher
                 "Art/2DItems/Currency/CurrencyUpgradeToUniqueShard.dds",  # Chance Shard 机会石碎片
                 "Art/2DItems/Currency/CurrencyRerollSocketNumbers01.dds",  # "Lesser Jeweller's Orb" 机会石碎片
-                "Art/2DItems/Belts/Basetypes/Belt09.dds",  # Heavy Belt
+                # "Art/2DItems/Belts/Basetypes/Belt09.dds",  # Heavy Belt
                 "Art/2DItems/Amulets/Basetypes/StellarAmulet.dds",  # Stellar Amulet
                 "Art/2DItems/Rings/Basetypes/SapphireRing.dds",  # Sapphire Ring
                 "Art/2DItems/Rings/Basetypes/GoldRing.dds",  # Gold Ring
-                
-                "Art/2DItems/Maps/UltimatumTrialItem.dds",
+                "Art/2DItems/Amulets/Basetypes/SolarAmulet.dds",  # SolarAmulet
+
+                # "Art/2DItems/Maps/UltimatumTrialItem.dds",
+                "Art/2DItems/Jewels/SapphireJewel.dds",
+                "Art/2DItems/Jewels/EmeraldJewel.dds",
+
+
+                "Art/2DItems/Maps/EndgameMaps/EndgameMap8.dds",  # 12 Waystone (Tier 12)
+                "Art/2DItems/Maps/EndgameMaps/EndgameMap9.dds",  # 12 Waystone (Tier 12)
+                "Art/2DItems/Maps/EndgameMaps/EndgameMap10.dds",  # 12 Waystone (Tier 12)
+                "Art/2DItems/Maps/EndgameMaps/EndgameMap11.dds",  # 12 Waystone (Tier 12)
+                "Art/2DItems/Maps/EndgameMaps/EndgameMap12.dds",  # 12 Waystone (Tier 12)
                 "Art/2DItems/Maps/EndgameMaps/EndgameMap13.dds",  # 13 Waystone (Tier 13)
                 "Art/2DItems/Maps/EndgameMaps/EndgameMap14.dds",  # 14 Waystone (Tier 14)
                 "Art/2DItems/Maps/EndgameMaps/EndgameMap15.dds",  # 15 Waystone (Tier 15)
+
                 ]
+
+g_to_pick=[
+    # 'Art/2DItems/Weapons/OneHandWeapons/Scepters/Basetypes/Sceptre06a.dds',
+    # 'Art/2DItems/Weapons/OneHandWeapons/Scepters/Basetypes/Sceptre06b.dds',
+    # 'Art/2DItems/Weapons/OneHandWeapons/Scepters/Basetypes/Sceptre06c.dds',
+    # "Art/2DItems/Weapons/OneHandWeapons/Scepters/Basetypes/Sceptre01.dds",
+    # "Art/2DItems/Weapons/OneHandWeapons/Scepters/Basetypes/Sceptre02.dds",
+    "Art/2DItems/Rings/Basetypes/PrismaticRing.dds",
+
+]
 
 # big piles of gold
 for tier in range(2, 17):
@@ -1493,17 +1569,24 @@ for tier in range(2, 17):
 def isItemHasPickableKey(item_label: PickableItemLabel):
     if item_label.icon_render in ARTS_TO_PICK:
         return True
-    elif item_label.icon_render.startswith(
+    elif (item_label.icon_render.startswith(
             "Art/2DItems/Currency/") and not item_label.icon_render.startswith(
-        "Art/2DItems/Currency/Runes/") and "/Ruthless/" not in item_label.icon_render:  # All currency
+        "Art/2DItems/Currency/Runes/") and "/Ruthless/" not in item_label.icon_render and
+          item_label.icon_render !="Art/2DItems/Currency/Sanctum/BalbalaCoin1.dds" and
+          item_label.icon_render !="Art/2DItems/Currency/PrecursorTablets/PrecursorTabletGeneric.dds"):  # All currency
         return True
     # elif item_label.icon_render.startswith("Art/2DItems/Maps/EndgameMaps/"):  # All maps
     #     return True
-    elif item_label.icon_render.startswith("Art/2DItems/Jewels/"):  # Jewels
+    # elif item_label.icon_render.startswith("Art/2DItems/Jewels/"):  # Jewels
+    #     return True
+    # elif "Amulets" in item_label.icon_render:
+    #     return True
+    # elif "Rings" in item_label.icon_render:
+    #     return True
+    elif item_label.displayed_name == "Uncut Skill Gem (Level 20)" or item_label == "Uncut Spirit Gem (Level 20)":
         return True
-    elif "Amulets" in item_label.icon_render:
-        return True
-    elif "Rings" in item_label.icon_render:
+    # elif item_label.icon_render in g_to_pick:
+    elif item_label.icon_render in g_to_pick and item_label.rarity=='Rare':
         return True
     return False
 
