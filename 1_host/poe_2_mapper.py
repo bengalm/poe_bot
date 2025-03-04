@@ -1182,7 +1182,7 @@ class MapArea(PoeBotComponent):
                 )
                 # then, it result is True, False or None
                 print(f"[MapArea.complete] mover.goToPoint result {result}")
-
+                time.sleep(random.uniform(20,30)/100)
                 if self.mapper.isMapCompleted() is True:
                     mapper.cache.map_completed = True
                     break
@@ -1532,6 +1532,7 @@ ARTS_TO_PICK = ["Art/2DItems/Maps/DeliriumSplinter.dds",
                 # "Art/2DItems/Maps/UltimatumTrialItem.dds",
                 "Art/2DItems/Jewels/SapphireJewel.dds",
                 "Art/2DItems/Jewels/EmeraldJewel.dds",
+                "Art/2DItems/Rings/Basetypes/BreachRing.dds",
 
 
                 "Art/2DItems/Maps/EndgameMaps/EndgameMap8.dds",  # 12 Waystone (Tier 12)
