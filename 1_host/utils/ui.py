@@ -85,12 +85,14 @@ class Item:
       if random.randint(1, 10) == 1:
         iterations += 1
     for i in range(iterations):
+      time.sleep(random.randint(30, 55) / 100)
       bot_controls.mouse.press(button=button)
       if random.randint(0, 2) != 0:
         self.hover()
       bot_controls.mouse.release(button=button)
     if hold_ctrl is True or hold_shift is True:
       time.sleep(random.randint(5, 7) / 100)
+    time.sleep(random.randint(20, 50) / 100)
     if hold_ctrl is True:
       bot_controls.keyboard_releaseKey("DIK_LCONTROL")
     if hold_shift is True:
@@ -234,7 +236,7 @@ class Ui:
       if hold_ctrl:
         self.poe_bot.bot_controls.keyboard_pressKey("DIK_LCONTROL")
       if hold_ctrl and hold_shift:
-        time.sleep(random.uniform(0.05, 0.10))
+        time.sleep(random.uniform(0.08, 0.10))
       if hold_shift:
         self.poe_bot.bot_controls.keyboard_pressKey("DIK_LSHIFT")
 
@@ -242,7 +244,7 @@ class Ui:
       if hold_ctrl is True:
         bot_controls.keyboard_releaseKey("DIK_LCONTROL")
       if hold_ctrl and hold_shift:
-        time.sleep(random.uniform(0.05, 0.10))
+        time.sleep(random.uniform(0.08, 0.10))
       if hold_shift is True:
         bot_controls.keyboard_releaseKey("DIK_LSHIFT")
 
@@ -340,15 +342,17 @@ class Ui:
       distance_to_item = dist(self.poe_bot.ui.last_clicked_ui_element_pos, item_screen_pos)
       cells_to_item = distance_to_item / INVENTORY_SLOT_CELL_SIZE
       time.sleep(random.randint(5, 10) * 0.01 * cells_to_item)
+      time.sleep(random.randint(20, 80) / 100)
       item.click(can_click_multiple_times=3, mouse_speed_mult=mouse_speed_mult)
       if random_sleep is True:
         sleep_time = 0
         sleep_time += self.poe_bot.afk_temp.performShortSleep(return_sleep_val=True)
         print(f"[ui, click multiple] sleep_time {sleep_time}")
         if sleep_time != 0:
-          releaseButtons()
-          time.sleep(sleep_time)
-          holdButtons()
+          time.sleep(random.randint(20, 80) / 100)
+          # releaseButtons()
+          # time.sleep(sleep_time)
+          # holdButtons()
         if random.randint(1, 100000) == 1:
           print("random sleep random.randint(1,100000) == 1")
           time.sleep(random.randint(5, 15))
@@ -362,7 +366,8 @@ class Ui:
     for item_index in items_to_skip_indexes:
       item = items[item_index]
       item.click(can_click_multiple_times=1, mouse_speed_mult=int(mouse_speed_mult * 1.5))
-      time.sleep(random.randint(20, 80) / 100)
+      time.sleep(random.randint(40, 80) / 100)
+    time.sleep(random.randint(20, 80) / 100)
     releaseButtons()
 
 

@@ -389,7 +389,7 @@ class AfkTempData(TempSkeleton):
     time_now = time.time()
     self.last_short_sleep = time_now
     self.next_short_sleep = time_now + random.randint(5, 59) * 60 + random.randint(0, 60)
-    self.short_sleep_duration = random.randint(5, 60)
+    self.short_sleep_duration = random.randint(2, 5)
     self.short_sleep_delay = random.randint(1, 13)
     self.short_sleep_tries = 0
     self.save()

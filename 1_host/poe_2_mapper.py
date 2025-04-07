@@ -11,6 +11,8 @@ from ast import literal_eval
 from math import dist
 from typing import List, Type
 
+from numpy.random import normal
+
 from utils.gamehelper import Entity, Poe2Bot
 
 # In[ ]:
@@ -55,7 +57,6 @@ MAPS_TO_IGNORE = [
     "MapMesa",  # tower
     "MapSwampTower",  # multi layerd
     "MapSwampTower_NoBoss",  # multi layerd
-    "MapSeepage",  # multi layerd
     "MapUberBoss_IronCitadel",  # 'MapUberBoss_IronCitadel'
     "MapSunTemple_NoBoss",  # 'MapSunTemple'
     "MapSunTemple",  # 'MapSunTemple'
@@ -65,6 +66,8 @@ MAPS_TO_IGNORE = [
     "MapUberBoss_CopperCitadel",  # 'MapUberBoss_StoneCitadel'
     "MapVaalFactory_NoBoss",  # 'MapVaalFactory_NoBoss'
     "MapVaalFactory",  # 'MapVaalFactory'
+    "MapSeepage",  # 'MapVaalFactory'
+    "MapSeepage_NoBoss",  # 'MapVaalFactory'
 
 ]
 
@@ -98,7 +101,7 @@ class MapperSettings:
     prefered_tier: str = "12+"
     min_map_tier = 1
     max_map_tier = 15
-    prefer_high_tier = True
+    prefer_high_tier = False
 
     # TODO keep consumables same as maps.ipynb
     keep_consumables = []
@@ -777,19 +780,19 @@ class Mapper2(PoeBotComponent):
         # TODO, supposed to step on those shard packs to open them
         # Metadata/Monsters/LeagueDelirium/DoodadDaemons/DoodadDaemonShardPack<smth> or 1 only is metadata key for those things
         if settings.force_deli:
-            # delirium_mirror_monster = next(
-            #     (
-            #         e
-            #         for e in poe_bot.game_data.entities.all_entities
-            #         if
-            #         # e.path == "Metadata/Monsters/LeagueDelirium/DoodadDaemons/DoodadDaemonShardPack1" and e.isOnPassableZone()
-            #         e.path == "Metadata/Monsters/LeagueDelirium/DoodadDaemons/DoodadDaemonShardPack1"
-            #     ),
-            #     None,
-            # )
-            # if delirium_mirror_monster:
-            #     print(f'mirror_monster ------------')
-            #     poe_bot.mover.goToEntitysPoint(delirium_mirror_monster, min_distance=10)
+            delirium_mirror_monster = next(
+                (
+                    e
+                    for e in poe_bot.game_data.entities.all_entities
+                    if
+                    # e.path == "Metadata/Monsters/LeagueDelirium/DoodadDaemons/DoodadDaemonShardPack1" and e.isOnPassableZone()
+                    e.path == "Metadata/Monsters/LeagueDelirium/DoodadDaemons/DoodadDaemonShardPack1"
+                ),
+                None,
+            )
+            if delirium_mirror_monster:
+                print(f'mirror_monster ------------')
+                poe_bot.mover.goToEntitysPoint(delirium_mirror_monster, min_distance=10)
             pass
 
         # TODO custom break function to check if there are any other activators which are closer on our way
@@ -820,13 +823,30 @@ class Mapper2(PoeBotComponent):
                     if mob_to_kill is None:
                         break
                 if mob_to_kill is not None:
-                    poe_bot.combat_module.killUsualEntity(mob_to_kill)
+                    kill_done=poe_bot.combat_module.killUsualEntity(mob_to_kill)
+                    if kill_done:
+                        # 捡
+                        print(f'no monster gonna to collectLoot --------->')
+                        while True:
+                            poe_bot.refreshInstanceData()
+                            resk = poe_bot.loot_picker.collectLoot()
+                            if resk is False:
+                                break
+
                 return True
         if settings.force_kill_blue is not False:
             mob_to_kill = next((e for e in poe_bot.game_data.entities.attackable_entities_blue if e.isOnPassableZone()),
                                None)
             if mob_to_kill:
-                poe_bot.combat_module.killUsualEntity(mob_to_kill)
+                kill_done=poe_bot.combat_module.killUsualEntity(mob_to_kill)
+                if kill_done:
+                    # 捡
+                    print(f'no monster gonna to collectLoot --------->')
+                    while True:
+                        poe_bot.refreshInstanceData()
+                        resk = poe_bot.loot_picker.collectLoot()
+                        if resk is False:
+                            break
                 return True
         if settings.do_essences is not False:
             if len(poe_bot.game_data.entities.essence_monsters) != 0:
@@ -1138,7 +1158,7 @@ class MapArea(PoeBotComponent):
         self.started_running_map_at = time.time()
 
         tsp = poe_bot.pather.tsp
-
+        settings = mapper.settings
         poe_bot.refreshInstanceData()
         while mapper.cache.map_completed is False:
             print("generating pathing points")
@@ -1246,7 +1266,21 @@ class MapArea(PoeBotComponent):
                 #     can_go_to_another_transition = False
                 #     break
                 # ENDBLOCK
-
+                if settings.force_deli:
+                    delirium_mirror_monster = next(
+                        (
+                            e
+                            for e in poe_bot.game_data.entities.all_entities
+                            if
+                            # e.path == "Metadata/Monsters/LeagueDelirium/DoodadDaemons/DoodadDaemonShardPack1" and e.isOnPassableZone()
+                            e.path == "Metadata/Monsters/LeagueDelirium/DoodadDaemons/DoodadDaemonShardPack1"
+                        ),
+                        None,
+                    )
+                    if delirium_mirror_monster:
+                        print(f'mirror_monster ------------')
+                        poe_bot.mover.goToEntitysPoint(delirium_mirror_monster, min_distance=10)
+                    pass
                 # TODO useful?
                 # if map was discovered
                 if (
@@ -1492,7 +1526,7 @@ mapper_settings.do_rituals = False
 # mapper_settings.do_rituals_buyout_function =
 mapper_settings.high_priority_maps = ["MapBluff"]
 # mapper_settings.complete_tower_maps = False
-mapper_settings.min_map_tier = 8
+mapper_settings.min_map_tier = 1
 mapper_settings.anoint_maps = False
 
 # In[ ]:
@@ -1505,7 +1539,7 @@ mapper = Mapper2(poe_bot=poe_bot, settings=mapper_settings)
 
 # set up loot filter
 from utils.loot_filter import PickableItemLabel
-
+# 'Normal'  'Magic' Rare
 ARTS_TO_PICK = ["Art/2DItems/Maps/DeliriumSplinter.dds",
                 "Art/2DItems/Maps/",
                 "Art/2DItems/Currency/CurrencyModValues.dds",  # divine
@@ -1523,16 +1557,16 @@ ARTS_TO_PICK = ["Art/2DItems/Maps/DeliriumSplinter.dds",
                 "Art/2DItems/Currency/CurrencyWeaponMagicQuality.dds",  # 打动 Arcanist's Etcher
                 "Art/2DItems/Currency/CurrencyUpgradeToUniqueShard.dds",  # Chance Shard 机会石碎片
                 "Art/2DItems/Currency/CurrencyRerollSocketNumbers01.dds",  # "Lesser Jeweller's Orb" 机会石碎片
-                # "Art/2DItems/Belts/Basetypes/Belt09.dds",  # Heavy Belt
-                "Art/2DItems/Amulets/Basetypes/StellarAmulet.dds",  # Stellar Amulet
-                "Art/2DItems/Rings/Basetypes/SapphireRing.dds",  # Sapphire Ring
-                "Art/2DItems/Rings/Basetypes/GoldRing.dds",  # Gold Ring
-                "Art/2DItems/Amulets/Basetypes/SolarAmulet.dds",  # SolarAmulet
+
 
                 # "Art/2DItems/Maps/UltimatumTrialItem.dds",
                 "Art/2DItems/Jewels/SapphireJewel.dds",
                 "Art/2DItems/Jewels/EmeraldJewel.dds",
                 "Art/2DItems/Rings/Basetypes/BreachRing.dds",
+
+                "Art/2DItems/Rings/Uniques/VentorsGamble.dds",
+                "Art/2DItems/Belts/Uniques/Headhunter.dds",
+                "Art/2DItems/Rings/Uniques/StoneOfOndar.dds",
 
 
                 "Art/2DItems/Maps/EndgameMaps/EndgameMap8.dds",  # 12 Waystone (Tier 12)
@@ -1553,8 +1587,16 @@ g_to_pick=[
     # "Art/2DItems/Weapons/OneHandWeapons/Scepters/Basetypes/Sceptre01.dds",
     # "Art/2DItems/Weapons/OneHandWeapons/Scepters/Basetypes/Sceptre02.dds",
     "Art/2DItems/Rings/Basetypes/PrismaticRing.dds",
-
 ]
+normal_to_pick=[
+    # "Art/2DItems/Belts/Basetypes/Belt09.dds",  # Heavy Belt
+    "Art/2DItems/Amulets/Basetypes/StellarAmulet.dds",  # Stellar Amulet
+    "Art/2DItems/Rings/Basetypes/SapphireRing.dds",  # Sapphire Ring
+    "Art/2DItems/Rings/Basetypes/GoldRing.dds",  # Gold Ring
+    "Art/2DItems/Amulets/Basetypes/SolarAmulet.dds",  # SolarAmulet
+    "Art/2DItems/Rings/Basetypes/TopazRing.dds",  #
+]
+
 
 # big piles of gold
 for tier in range(2, 17):
@@ -1588,6 +1630,8 @@ def isItemHasPickableKey(item_label: PickableItemLabel):
         return True
     # elif item_label.icon_render in g_to_pick:
     elif item_label.icon_render in g_to_pick and item_label.rarity=='Rare':
+        return True
+    elif item_label.icon_render in normal_to_pick and item_label.rarity=='Normal':
         return True
     return False
 
